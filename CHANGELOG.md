@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- *(placeholder for future changes)*
+
+## [10.7.0] - 2026-06-05
+
+### Added
+- 排版修复脚本 `scripts/fix_case_formatting.py`
+- 补充模块 F-J 全部落地（增长引擎、周期定位、行业分化、颠覆风险、跨行业比较）
+
+### Changed
+- **目录规范化**: 3个中文目录名改英文 kebab-case（801720→beauty-personal-care 等）
+- **行业重分类**: 国防军工 04-Emerging→03-Regulated，煤炭 04-Emerging→01-Traditional
+- **三级目录结构**: 3个无 subsector 行业补齐 `{subsector}/{code}-{name}` 三级结构
+- **排版修复**: 18个深度案例去除多余 H1、升级旧编号（3️⃣→1️⃣1️⃣ 等）
+- 所有 32 个案例格式统一通过验证
+
+## [10.6.0] - 2026-06-04
+
+### Added
 - GitHub Actions CI/CD pipelines
 - Standard repository structure (docs/, theory/, cases/)
 - Contributing guidelines
