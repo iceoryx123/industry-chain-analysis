@@ -315,6 +315,21 @@ def generate_insights(code: str, row: dict, meta: dict) -> str:
     # ── 版本标签 ──
     version_tag = "双模(v10.x)" if has_net else "传统(v9.2)"
 
+    # ── 格式化拐点信号（正/负分组） ──
+    pos_signals = [s for s in signals if s.startswith("📈") or s.startswith("💰") or s.startswith("👥")]
+    warn_signals = [s for s in signals if s.startswith("⚠️") or s.startswith("📉")]
+    info_signals = [s for s in signals if s not in pos_signals and s not in warn_signals]
+
+    signals_block = ""
+    if pos_signals:
+        signals_block += "> ✅ **积极信号**\n" + "\n".join(f"> - {s}" for s in pos_signals) + "\n\n"
+    if warn_signals:
+        signals_block += "> ⚠️ **风险信号**\n" + "\n".join(f"> - {s}" for s in warn_signals) + "\n\n"
+    if info_signals:
+        signals_block += "> ℹ️ **关注事项**\n" + "\n".join(f"> - {s}" for s in info_signals) + "\n"
+    if not signals_block:
+        signals_block = "> ℹ️ 当前指标无明显拐点信号，持续观察\n"
+
     return f"""### 🔍 自动洞见（基于规则引擎）
 
 > ⏱️ **数据时效说明**
@@ -323,36 +338,33 @@ def generate_insights(code: str, row: dict, meta: dict) -> str:
 > - 数据拉取日期：**{fetch_date or "未知"}**
 > - ⚠️ 评分和结论基于上述时效的数据，**数据过期后结论可能失效**
 
-**行业**：{name} | **类别**：{cat} | **细分**：{sub} | **版本**：{version_tag}
+**行业**：{name} &nbsp;|&nbsp; **类别**：{cat} &nbsp;|&nbsp; **细分**：{sub} &nbsp;|&nbsp; **版本**：{version_tag}
 
-**价值枢纽识别**：{hub}
+---
+#### 📍 价值枢纽识别
+> {hub}
 
-**质量评分**（满分10）：
-- 🛡️ 护城河：{moat}/10
-- 💎 定价权：{pricing}/10
-- 🔒 替代难度：{subst}/10
-- 🌐 生态位：{eco}/10
-- 📊 **综合评分**：{composite}/10
+#### ⭐ 质量评分（加权综合）
 
-**补充模块（F-J）自动诊断**：
+| 维度 | 🛡️ 护城河 | 💎 定价权 | 🔒 替代难度 | 🌐 生态位 | 📊 **综合** |
+|:----:|:--------:|:--------:|:----------:|:--------:|:---------:|
+| 评分 | {moat}/10 | {pricing}/10 | {subst}/10 | {eco}/10 | **{composite}/10** |
 
-**F - 增长引擎**：{growth_quality}
-- 渗透率阶段：{penetration_stage}
-- 天花板判断：{ceiling_judgment}
+---
+#### 📋 补充模块 · 自动诊断
 
-**G - 周期定位**：{cyc_type} | 当前位置：{cyc_pos}（ROE历史百分位{cycle_score:.0f}%）
-- 投资策略：{"顺周期配置，关注库存和产能指标" if cyc_type == "强周期" else "成长型配置，关注增长持续性" if cyc_type == "成长周期" else "防御型配置，关注股息和稳定性"}
+| 模块 | 诊断 |
+|:---:|:-----|
+| **F 🔄 增长引擎** | {growth_quality} — 渗透率：{penetration_stage}，{ceiling_judgment} |
+| **G 📅 周期定位** | {cyc_type} · 当前位置 {cyc_pos}（ROE分位{cycle_score:.0f}%）· {"顺周期" if cyc_type == "强周期" else "成长型" if cyc_type == "成长周期" else "防御型"}配置 |
+| **H 🏢 行业分化** | {differentiation}（CR4={cr4:.3f}·HHI={hhi:.1f}） |
+| **I ⚡ 颠覆风险** | {risk_level} — {disrupt_source} |
 
-**H - 行业分化**：{differentiation}
-
-**I - 颠覆风险**：{risk_level}
-- 风险来源：{disrupt_source}
-
-**拐点信号**：
-{chr(10).join("- " + s for s in signals) if signals else "- 暂无明显拐点信号"}
-
-**业务启示**：
-- {suggestion}
+---
+#### 🚨 拐点信号
+{signals_block}
+#### 💡 业务启示
+> {suggestion}
 """
 
 
@@ -432,7 +444,7 @@ def main():
             case_md.write_text(txt, encoding="utf-8")
 
             # 提取评分
-            score_match = re.search(r'综合评分\*{0,2}[：:]\s*([\d.]+)/10', insight)
+            score_match = re.search(r'\|\s+\*\*([\d.]+)/10\*\*\s+\|', insight)
             score_str = score_match.group(1) if score_match else "N/A"
             print(f"  ✅ {meta['name']} ({code}): {score_str}/10")
             count += 1
