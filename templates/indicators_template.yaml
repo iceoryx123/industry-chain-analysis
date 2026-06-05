@@ -1,0 +1,16 @@
+# 示例指标文件（每个案例应复制此文件并填充实际数据）
+# 所有字段均采用统一命名，便于 CI 与对比脚本读取
+
+date: "2025-01-01"   # 数据对应的统计日期（YYYY-MM-DD）
+market_size_cny_bn: 0   # 行业规模（亿元人民币）
+cr4: 0.0                # 前四大企业市场份额（0‑1）
+hhi: 0                 # Herfindahl‑Hirschman Index（0‑1, 乘以 1,000）
+gross_margin: 0.0      # 平均毛利率（0‑1）
+roe: 0.0               # 平均净资产收益率（0‑1）
+rd_intensity: 0.0      # 研发投入占收入比例（0‑1）
+# 对于有网络效应的行业（平台型），请额外填写：
+network_intensity: 0.0 # 网络效应强度（用户活跃度、平台交易额等）
+platform_users_million: 0   # 平台活跃用户（百万）
+average_transaction_value_cny: 0  # 平均交易额（元）
+
+# 其它自定义字段可自行添加，保持键名的 snake_case 规范。
