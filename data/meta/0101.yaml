@@ -1,0 +1,9 @@
+code: "0101"
+name: "儿科医院"
+category: "01‑Traditional"
+subsector: "Healthcare"
+has_network_effect: false
+update_cycle: "quarterly"
+data_source: ["Wind", "公司年报", "卫健委"]
+representative_ticker: "300015.SZ"
+official_website: ""

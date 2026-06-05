@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>产业链指标对比仪表盘</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>body{margin:20px}.table{font-size:14px}</style>
+</head>
+<body>
+<div class="container">
+<h1>📊 产业链指标对比仪表盘</h1>
+<p>更新日期：2026-06-05 | 数据来源：akshare / yfinance / pytrends / 公开网页</p>
+<hr>
+<div class="table-responsive">
+<table class="table table-striped table-bordered" id="compTable">
+<thead class="table-dark">
+<tr><th>代码</th><th>行业</th><th>类别</th>
+<th>date</th><th>market_size_cny_bn</th><th>cr4</th><th>hhi</th><th>gross_margin</th><th>roe</th><th>rd_intensity</th><th>network_intensity</th><th>platform_users_million</th><th>average_transaction_value_cny</th>
+</tr></thead>
+<tbody><tr><td>0101</td><td>儿科医院</td><td>01‑Traditional</td><td>2025-04-15</td><td>125.00</td><td>0.1900</td><td>860.00</td><td>0.4100</td><td>0.1700</td><td>0.0300</td><td>0.0000</td><td>0.0000</td><td>0.0000</td></tr>
+<tr><td>0102</td><td>口腔医院</td><td>01‑Traditional</td><td>2025-04-15</td><td>88.00</td><td>0.1300</td><td>730.00</td><td>0.5400</td><td>0.2100</td><td>0.0200</td><td>0.0000</td><td>0.0000</td><td>0.0000</td></tr>
+<tr><td>0301</td><td>互联网</td><td>02‑Platform</td><td>2025-04-15</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.6800</td><td>620.00</td><td>47.80</td></tr>
+<tr><td>0302</td><td>AI行业</td><td>02‑Platform</td><td>2026-06-05</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2>📈 行业对比趋势</h2>
+<canvas id="chart" width="800" height="400"></canvas>
+<script>
+const ctx = document.getElementById('chart').getContext('2d');
+const data = [{"code":"0101","name":"\u513f\u79d1\u533b\u9662","category":"01\u2011Traditional","subsector":"Healthcare","date":"2025-04-15","market_size_cny_bn":125.0,"cr4":0.19,"hhi":860.0,"gross_margin":0.41,"roe":0.17,"rd_intensity":0.03,"network_intensity":0.0,"platform_users_million":0.0,"average_transaction_value_cny":0.0},{"code":"0102","name":"\u53e3\u8154\u533b\u9662","category":"01\u2011Traditional","subsector":"Healthcare","date":"2025-04-15","market_size_cny_bn":88.0,"cr4":0.13,"hhi":730.0,"gross_margin":0.54,"roe":0.21,"rd_intensity":0.02,"network_intensity":0.0,"platform_users_million":0.0,"average_transaction_value_cny":0.0},{"code":"0301","name":"\u4e92\u8054\u7f51","category":"02\u2011Platform","subsector":"Internet & Media","date":"2025-04-15","market_size_cny_bn":0.0,"cr4":0.0,"hhi":0.0,"gross_margin":0.0,"roe":0.0,"rd_intensity":0.0,"network_intensity":0.68,"platform_users_million":620.0,"average_transaction_value_cny":47.8},{"code":"0302","name":"AI\u884c\u4e1a","category":"02\u2011Platform","subsector":"AI & Big\u2011Data","date":"2026-06-05","market_size_cny_bn":0.0,"cr4":0.0,"hhi":0.0,"gross_margin":0.0,"roe":0.0,"rd_intensity":0.0,"network_intensity":0.0,"platform_users_million":0.0,"average_transaction_value_cny":0.0}];
+const labels = data.map(d => d.name);
+const datasets = ['gross_margin','network_intensity','roe'].map(key => ({
+    label: key,
+    data: data.map(d => d[key] || 0),
+    borderWidth: 1
+}));
+new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+});
+</script>
+</div>
+</body>
+</html>
