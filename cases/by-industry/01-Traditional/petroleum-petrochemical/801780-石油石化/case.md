@@ -70,12 +70,33 @@ tags: ["石油石化", "Petroleum & Petrochemical", "申万一级"]
 > **关键指标（自动填充）**
 > | 指标 | 数值 |
 > |------|------|
-> | 市场规模 | {{ indicator.market_size_cny_bn }} 亿元 |
-> | CR4 | {{ indicator.cr4 }} |
-> | HHI | {{ indicator.hhi }} |
-> | 毛利率 | {{ indicator.gross_margin }} |
-> | ROE | {{ indicator.roe }} |
-> | 研发强度 | {{ indicator.rd_intensity }} |
-> | 网络强度 | {{ indicator.network_intensity }} |
-> | 平台用户 | {{ indicator.platform_users_million }} 百万 |
-> | 平均交易额 | {{ indicator.average_transaction_value_cny }} 元 |
+> | 市场规模 | 0.0000 亿元 |
+> | CR4 | 0.0000 |
+> | HHI | 0.0000 |
+> | 毛利率 | 0.0000 |
+> | ROE | 0.0000 |
+> | 研发强度 | 0.0000 |
+> | 网络强度 | 0.0000 |
+> | 平台用户 | 0.0000 百万 |
+> | 平均交易额 | 0.0000 元 |
+
+### 🔍 自动洞见（基于规则引擎）
+
+**行业**：石油石化 | **类别**：01-Traditional | **细分**：Petroleum & Petrochemical | **版本**：传统(v9.2)
+
+**价值枢纽识别**：石油石化产业链关键环节（需进一步识别）
+
+**质量评分**（满分10）：
+- 🛡️ 护城河：1/10
+- 💎 定价权：1/10
+- 🔒 替代难度：1/10
+- 🌐 生态位：1/10
+- 📊 **综合评分**：1.0/10
+
+**拐点信号**：
+- ⚠️ 毛利率偏低，行业竞争激烈
+- ⚠️ ROE 低于资金成本，价值毁灭风险
+
+**业务启示**：
+- 行业较为分散，需进一步细分识别潜在价值枢纽
+

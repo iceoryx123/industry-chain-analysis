@@ -1,0 +1,75 @@
+# ============================================================================
+# 评分规则配置
+# ============================================================================
+# 本文件定义行业价值枢纽的质量评分体系。
+# 变量名对应 IndicatorRow 的字段名：
+#   gross_margin, roe, rd_intensity, network_intensity,
+#   platform_users_million, cr4, hhi, market_size_cny_bn
+#
+# 公式返回 0-10 之间的分数。
+# ============================================================================
+
+# 默认评分维度（适用于大多数行业）
+default:
+  dimensions:
+    - name: moat             # 护城河
+      label: 护城河
+      weight: 0.30
+      formula: "min(10, gross_margin * 20 + 2)"
+
+    - name: pricing_power    # 定价权
+      label: 定价权
+      weight: 0.25
+      formula: "min(10, roe * 30 + 2)"
+
+    - name: substitution     # 替代难度
+      label: 替代难度
+      weight: 0.25
+      formula: "min(10, rd_intensity * 50 + 2)"
+
+    - name: ecosystem        # 生态位
+      label: 生态位
+      weight: 0.20
+      formula: "min(10, network_intensity * 8 + platform_users_million * 0.5 + 2)"
+
+# 特定行业覆盖
+overrides:
+  # 平台/网络型行业 → 提高网络效应权重
+  290000-计算机:
+    dimensions:
+      - name: ecosystem
+        label: 生态位
+        weight: 0.35
+        formula: "min(10, network_intensity * 8 + platform_users_million * 0.5 + 2)"
+      - name: moat
+        label: 护城河
+        weight: 0.25
+        formula: "min(10, gross_margin * 20 + 2)"
+      - name: pricing_power
+        label: 定价权
+        weight: 0.20
+        formula: "min(10, roe * 30 + 2)"
+      - name: substitution
+        label: 替代难度
+        weight: 0.20
+        formula: "min(10, rd_intensity * 50 + 2)"
+
+  # 制造业 → 提高研发权重
+  390000-机械设备:
+    dimensions:
+      - name: substitution
+        label: 替代难度
+        weight: 0.35
+        formula: "min(10, rd_intensity * 50 + 2)"
+      - name: moat
+        label: 护城河
+        weight: 0.30
+        formula: "min(10, gross_margin * 20 + 2)"
+      - name: pricing_power
+        label: 定价权
+        weight: 0.20
+        formula: "min(10, roe * 30 + 2)"
+      - name: ecosystem
+        label: 生态位
+        weight: 0.15
+        formula: "min(10, network_intensity * 8 + 2)"
