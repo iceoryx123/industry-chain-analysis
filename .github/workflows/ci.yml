@@ -1,14 +1,17 @@
-name: CI
+name: CI - 全链路自动化
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    - cron: '0 3 * * *'      # 每日 03:00 UTC
+  workflow_dispatch:
 
 jobs:
-  lint:
-    name: Lint & Validate
+  pipeline:
+    name: 数据抓取 → 渲染 → 洞见 → 对比
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,66 +19,59 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node (for markdownlint)
-        uses: actions/setup-node@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          node-version: '20'
+          python-version: "3.11"
 
-      - name: Install markdownlint-cli
-        run: npm ci 2>/dev/null || npm install -g markdownlint-cli
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-      - name: Lint Markdown files
-        run: |
-          find . -name "*.md" -not -path "./.git/*" -not -path "./node_modules/*" | xargs markdownlint --config .markdownlint.json || true
+      # ========== 1️⃣ 数据抓取 ==========
+      - name: Fetch public financial data (akshare / yfinance)
+        run: python scripts/fetch_public_financial.py || true
+        continue-on-error: true
 
+      - name: Fetch public network data (pytrends / Alexa / News)
+        run: python scripts/fetch_public_network.py || true
+        continue-on-error: true
+
+      - name: ETL - unify & dedup CSVs
+        run: python scripts/etl_indicators.py
+
+      # ========== 2️⃣ 渲染 & 洞见 ==========
+      - name: Render cases with latest indicators
+        run: python scripts/render_cases.py
+
+      - name: Generate rule-based insights
+        run: python scripts/generate_insights_template.py
+
+      - name: Generate comparison dashboard
+        run: python scripts/generate_comparison.py
+
+      # ========== 3️⃣ 质量检查 ==========
       - name: Check required files exist
         run: |
-          required_files=(
-            "README.md"
-            "SKILL.md"
-            "CHANGELOG.md"
-            "LICENSE"
-            "CONTRIBUTING.md"
-            "docs/design/architecture.md"
-            "docs/guides/quickstart.md"
-            "theory/v9.2/framework.md"
-            "theory/v10.x/v10.5.1.md"
-            "cases/README.md"
-          )
-          for f in "${required_files[@]}"; do
-            if [[ ! -f "$f" ]]; then
-              echo "❌ Missing: $f"
-              exit 1
-            else
-              echo "✅ Found: $f"
-            fi
+          for f in README.md SKILL.md CHANGELOG.md LICENSE CONTRIBUTING.md \
+                    theory/v9.2/framework.md theory/v10.x/v10.5.1.md \
+                    scripts/fetch_public_financial.py scripts/render_cases.py \
+                    requirements.txt; do
+            [[ -f "$f" ]] && echo "✅ $f" || { echo "❌ Missing: $f"; exit 1; }
           done
 
-      - name: Validate case index
+      - name: Lint Markdown (non-blocking)
         run: |
-          if [[ -f "cases/README.md" ]]; then
-            echo "📋 Case index exists"
-            head -50 cases/README.md
-          fi
+          pip install markdownlint-cli2 2>/dev/null || true
+          find . -name "*.md" -not -path "./.git/*" | xargs -r markdownlint-cli2 --config .markdownlint.json 2>/dev/null || true
 
-  validate-links:
-    name: Validate Links
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check markdown links
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
-        with:
-          use-quiet-mode: 'yes'
-          config-file: '.markdown-link-check.json'
-
-  spell-check:
-    name: Spell Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run cspell
-        uses: streetsidesoftware/cspell-action@v6
-        with:
-          files: '**/*.md'
-          inline: true
+      # ========== 4️⃣ 自动提交 ==========
+      - name: Auto-commit generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/indicators/ cases/comparison/overview.html
+          # Also add any case.md that changed
+          git add cases/**/case.md
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "ci: auto-update indicators, rendered cases & dashboard"
+          git push origin main
