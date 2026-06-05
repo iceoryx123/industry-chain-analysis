@@ -9,7 +9,7 @@
 import re
 from pathlib import Path
 
-ROOT = Path("/tmp/industry-chain-analysis-push")
+ROOT = Path("/tmp/industry-chain-analysis")
 CASE_ROOT = ROOT / "cases" / "by-industry"
 
 # 旧→新编号映射

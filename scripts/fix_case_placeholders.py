@@ -2,7 +2,7 @@
 """fix_case_placeholders.py - 为所有 case.md 添加 {{ indicator.xxx }} 占位符"""
 from pathlib import Path
 
-ROOT = Path("/tmp/industry-chain-analysis-push")
+ROOT = Path("/tmp/industry-chain-analysis")
 FIELDS = [
     ("market_size_cny_bn", "市场规模（亿元）"),
     ("cr4", "CR4"),

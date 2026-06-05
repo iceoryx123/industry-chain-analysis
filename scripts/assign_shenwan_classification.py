@@ -8,7 +8,7 @@
 import os, datetime, yaml, shutil
 from pathlib import Path
 
-ROOT = Path("/tmp/industry-chain-analysis-push")
+ROOT = Path("/tmp/industry-chain-analysis")
 META_DIR = ROOT / "data" / "meta"
 META_DIR.mkdir(parents=True, exist_ok=True)
 

@@ -11,7 +11,7 @@ import yfinance as yf
 import requests
 from pathlib import Path
 
-ROOT = Path(os.getenv("WORKSPACE", "/tmp/industry-chain-analysis-push"))
+ROOT = Path(os.getenv("WORKSPACE", "/tmp/industry-chain-analysis"))
 META_DIR = ROOT / "data" / "meta"
 OUT_DIR = ROOT / "data" / "indicators"
 OUT_DIR.mkdir(parents=True, exist_ok=True)

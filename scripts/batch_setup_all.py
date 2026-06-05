@@ -9,7 +9,7 @@
 import os, datetime, yaml, pandas as pd
 from pathlib import Path
 
-ROOT = Path("/tmp/industry-chain-analysis-push")
+ROOT = Path("/tmp/industry-chain-analysis")
 LEARN = ROOT / "learn" / "cases"
 META_DIR = ROOT / "data" / "meta"
 IND_DIR = ROOT / "data" / "indicators"

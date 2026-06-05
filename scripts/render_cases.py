@@ -3,7 +3,7 @@
 import re, pandas as pd
 from pathlib import Path
 
-ROOT = Path("/tmp/industry-chain-analysis-push")
+ROOT = Path("/tmp/industry-chain-analysis")
 IND_DIR = ROOT / "data" / "indicators"
 
 FIELDS = [

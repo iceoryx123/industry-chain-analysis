@@ -8,7 +8,7 @@
 import re, yaml
 from pathlib import Path
 
-ROOT = Path("/tmp/industry-chain-analysis-push")
+ROOT = Path("/tmp/industry-chain-analysis")
 
 # 加载所有 meta
 meta_by_code = {}

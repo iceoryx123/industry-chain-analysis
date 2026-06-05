@@ -7,7 +7,7 @@ import os, shutil, datetime, re
 from pathlib import Path
 import yaml
 
-ROOT = Path("/tmp/industry-chain-analysis-push")
+ROOT = Path("/tmp/industry-chain-analysis")
 META_DIR = ROOT / "data" / "meta"
 CASE_ROOT = ROOT / "cases" / "by-industry"
 TEMPLATE_V9 = ROOT / "templates" / "case_template_v9.md"

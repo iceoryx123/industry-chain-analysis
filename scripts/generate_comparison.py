@@ -7,7 +7,7 @@ v2.0 — 新增相对吸引力矩阵（补充模块J）
 import pandas as pd, yaml, datetime
 from pathlib import Path
 
-ROOT = Path("/tmp/industry-chain-analysis-push")
+ROOT = Path("/tmp/industry-chain-analysis")
 IND_DIR = ROOT / "data" / "indicators"
 META_DIR = ROOT / "data" / "meta"
 OUT_DIR = ROOT / "cases" / "comparison"

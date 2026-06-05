@@ -8,7 +8,7 @@ import re, shutil
 from pathlib import Path
 import yaml
 
-ROOT = Path("/tmp/industry-chain-analysis-push")
+ROOT = Path("/tmp/industry-chain-analysis")
 OLD_CASES = ROOT / "learn" / "cases"
 NEW_CASES = ROOT / "cases" / "by-industry"
 META_DIR = ROOT / "data" / "meta"

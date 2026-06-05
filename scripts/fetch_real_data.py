@@ -7,7 +7,7 @@ import sys, datetime, time, yaml
 from pathlib import Path
 import pandas as pd
 
-ROOT = Path("/tmp/industry-chain-analysis-push")
+ROOT = Path("/tmp/industry-chain-analysis")
 META_DIR = ROOT / "data" / "meta"
 OUT_DIR = ROOT / "data" / "indicators"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
