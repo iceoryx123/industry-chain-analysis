@@ -124,10 +124,10 @@ def run(stage: str, push: bool):
 # =========================================
 # list 子命令
 # =========================================
-@cli.command()
+@cli.command("list")
 @click.option("--industry", "-i", help="按申万行业筛选，如 '医药生物'")
 @click.option("--json", "-j", "json_out", is_flag=True, help="JSON 格式输出")
-def list(industry: str, json_out: bool):
+def list_cases(industry: str, json_out: bool):
     """列出所有行业案例"""
     from industry_chain.models import IndustryMeta
 
@@ -290,12 +290,12 @@ def insight(code: str, save: bool):
 # 内部函数
 # =========================================
 def _run_fetch():
-    """数据抓取"""
+    """数据抓取（仅处理案例级代码）"""
     from industry_chain.fetchers import AKSharesFetcher, WebFetcher
     from industry_chain.models import IndustryMeta
     import pandas as pd
 
-    metas = IndustryMeta.list_all()
+    metas = [m for m in IndustryMeta.list_all() if "-" in m.code]
     for meta in metas:
         _info(f"{meta.code} {meta.name}")
         # 使用 akshare 抓取财务数据
@@ -335,6 +335,8 @@ def _run_insights():
     gen = InsightGenerator()
     count = 0
     for meta in IndustryMeta.list_all():
+        if "-" not in meta.code:
+            continue
         indicators = IndicatorRow.load_latest(meta.code)
         result = gen.generate(meta, indicators.__dict__)
         # 追加到案例文件

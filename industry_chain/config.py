@@ -42,7 +42,7 @@ class Settings:
         self.OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
 
         # ---------- 运行模式 ----------
-        self.VERBOSE: bool = os.getenv("INDUSTRY_CHAIN_VERBOSE", "1") == "1"
+        self.VERBOSE: bool = os.getenv("INDUSTRY_CHAIN_VERBOSE", "0") == "1"
         self.OFFLINE: bool = os.getenv("INDUSTRY_CHAIN_OFFLINE", "0") == "1"
 
     @staticmethod

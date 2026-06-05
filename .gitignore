@@ -1,5 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# IDE
 .DS_Store
 __MACOSX/
 *.swp
 *.swo
 *~
+.idea/
+.vscode/
+
+# Environment
+.env
+venv/
+.venv/
+
+# Data (only committed as examples)
+data/indicators/*.csv.bak
+
+# OS
+Thumbs.db
