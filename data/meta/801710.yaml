@@ -1,6 +1,6 @@
 code: '801710'
 name: 国防军工
-category: 04-Emerging
+category: 03-Regulated
 subsector: Defense & Aerospace
 has_network_effect: false
 update_cycle: quarterly

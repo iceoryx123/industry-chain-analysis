@@ -1,0 +1,12 @@
+code: '801740'
+name: 商贸零售
+category: 01-Traditional
+subsector: Retail & Commerce
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 商务部
+representative_ticker: 600827.SH
+official_website: ''
+description: 商贸零售（申万一级行业），隶属于 04-Emerging / Retail & Commerce 类别。

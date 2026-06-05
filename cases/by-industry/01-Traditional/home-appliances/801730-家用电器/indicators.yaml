@@ -1,0 +1,12 @@
+code: '801730'
+name: 家用电器
+category: 01-Traditional
+subsector: Home Appliances
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 中国家电协会
+representative_ticker: 000333.SZ
+official_website: ''
+description: 家用电器（申万一级行业），隶属于 04-Emerging / Home Appliances 类别。
