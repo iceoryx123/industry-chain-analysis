@@ -2,6 +2,7 @@
 """generate_comparison.py
 生成跨行业对比仪表盘 HTML（Bootstrap + Chart.js）
 支持按类别筛选、排序
+v2.0 — 新增相对吸引力矩阵（补充模块J）
 """
 import pandas as pd, yaml, datetime
 from pathlib import Path
@@ -37,6 +38,44 @@ CAT_LABELS = {
     "04-Emerging": "🚀 新兴/跨界",
 }
 
+# ── 周期分类（与洞察引擎一致） ──
+CYCLE_MAP = {
+    "801010": "强周期", "801030": "强周期", "801040": "强周期",
+    "801050": "强周期", "801160": "弱周期", "801170": "弱周期",
+    "801730": "强周期", "801750": "强周期", "801770": "强周期",
+    "801790": "强周期", "801800": "强周期", "801880": "强周期",
+    "801080": "成长周期", "801100": "成长周期", "801140": "成长周期",
+    "801890": "成长周期", "801120": "弱防御", "801150": "弱防御",
+    "801200": "弱防御", "801210": "弱防御", "801180": "强防御",
+    "801780": "强防御", "811100": "弱周期", "801720": "弱防御",
+    "801740": "弱周期", "801760": "弱防御", "801190": "弱周期",
+}
+CYCLE_ORDER = {"强周期": 0, "弱周期": 1, "成长周期": 2, "弱防御": 3, "强防御": 4}
+
+# ── 颠覆风险分（1-4，用于数值化） ──
+DISRUPT_SCORE = {
+    "801010": 1, "801030": 2, "801040": 2, "801050": 1,
+    "801080": 2, "801100": 3, "801120": 1, "801140": 2,
+    "801150": 1, "801160": 1, "801170": 2, "801180": 2,
+    "801190": 2, "801200": 2, "801210": 1, "801710": 1,
+    "801720": 2, "801730": 2, "801740": 1, "801750": 1,
+    "801760": 3, "801770": 3, "801780": 1, "801790": 1,
+    "801800": 2, "801810": 1, "811100": 1, "801880": 3,
+    "801890": 2, "000001": 1,
+}
+
+# ── 标准化分（0-100），用于相对吸引力矩阵 ──
+def norm_score(val, higher_is_better=True):
+    """将单个指标映射到 0-100，用于综合评分"""
+    if val is None or val == 0:
+        return 0
+    v = float(val)
+    # 中值转换：毛利率、ROE等 0-1 到 0-100
+    if higher_is_better:
+        return min(100, max(0, v * 100))
+    else:
+        return min(100, max(0, (1 - v) * 100))
+
 def load_all():
     rows = []
     min_period = ""
@@ -67,6 +106,48 @@ def load_all():
             min_period = rp
         if rp and (not max_period or rp > max_period):
             max_period = rp
+
+        # ── 模块F-J：计算相对吸引力评分 ──
+        gm = float(latest.get("gross_margin", 0) or 0)
+        roe = float(latest.get("roe", 0) or 0)
+        rd = float(latest.get("rd_intensity", 0) or 0)
+        net = float(latest.get("network_intensity", 0) or 0)
+        cr4 = float(latest.get("cr4", 0) or 0)
+
+        # 增长吸引力分（模块F）：ROE + 毛利率 + 研发强度 加权
+        growth_score = (
+            norm_score(roe) * 0.35 +
+            norm_score(gm) * 0.35 +
+            norm_score(rd) * 0.15 +
+            norm_score(net) * 0.15
+        )
+        row["growth_score"] = round(growth_score, 1)
+
+        # 质量吸引力分（模块B体系）：毛利率 + ROE + CR4
+        quality_score = (
+            norm_score(gm) * 0.4 +
+            norm_score(roe) * 0.4 +
+            norm_score(cr4) * 0.2
+        )
+        row["quality_score"] = round(quality_score, 1)
+
+        # 周期定位
+        row["cycle_type"] = CYCLE_MAP.get(code, "弱周期")
+        row["cycle_order"] = CYCLE_ORDER.get(row["cycle_type"], 5)
+
+        # 颠覆风险（逆向：低风险=高分）
+        risk_score = DISRUPT_SCORE.get(code, 2)
+        row["disrupt_score"] = max(0, 5 - risk_score)  # 5-1=4, 5-2=3, 5-3=2, 5-4=1
+
+        # 综合相对吸引力
+        row["attractiveness"] = round(
+            row["growth_score"] * 0.3 +
+            row["quality_score"] * 0.4 +
+            row["disrupt_score"] * 0.15 +
+            (100 - row["cycle_order"] * 15) * 0.15,  # 强周期低分（波动大）
+            1
+        )
+
         rows.append(row)
     return pd.DataFrame(rows), min_period, max_period
 
@@ -80,6 +161,8 @@ def fmt(v, col):
     if col in ("hhi",):
         return f"{float(v):.0f}"
     if col in ("platform_users_million",):
+        return f"{float(v):.1f}"
+    if col in ("score",):
         return f"{float(v):.1f}"
     return str(v)
 
@@ -100,8 +183,31 @@ def build_html(df: pd.DataFrame, min_period: str = "", max_period: str = "") -> 
             {cells}
         </tr>\n"""
 
-    # 图表数据
-    chart_data = df[["name", "gross_margin", "roe", "network_intensity", "rd_intensity"]].to_json(orient="records")
+    # 图表数据（含周期分类和评分）
+    chart_data = df[["name", "gross_margin", "roe", "network_intensity", "rd_intensity",
+                     "growth_score", "quality_score", "attractiveness",
+                     "cycle_type", "cycle_order", "disrupt_score"]].to_json(orient="records")
+
+    # 相对吸引力表
+    attract_rows = df.sort_values("attractiveness", ascending=False)
+    attract_html = ""
+    for _, r in attract_rows.iterrows():
+        cat_label = CAT_LABELS.get(r["category"], r["category"])
+        # 周期徽标
+        cyc_badge = {"强周期": "danger", "弱周期": "warning", "成长周期": "success", "弱防御": "info", "强防御": "primary"}
+        cyc_class = cyc_badge.get(r.get("cycle_type", "弱周期"), "secondary")
+        # 颠覆风险颜色
+        dis_score = float(r.get("disrupt_score", 2))
+        dis_tag = "🟢低风险" if dis_score >= 3 else "🟡中风险" if dis_score >= 2 else "🟠高风险"
+        attract_html += f"""<tr>
+            <td>{cat_label}</td>
+            <td><strong>{r['name']}</strong></td>
+            <td class="text-end">{fmt(r.get('growth_score', 0), 'score')}</td>
+            <td class="text-end">{fmt(r.get('quality_score', 0), 'score')}</td>
+            <td><span class="badge bg-{cyc_class}">{r.get('cycle_type', '弱周期')}</span></td>
+            <td>{dis_tag}</td>
+            <td class="text-end"><strong>{fmt(r.get('attractiveness', 0), 'score')}</strong></td>
+        </tr>\n"""
 
     metric_headers = "".join(f'<th class="text-end">{METRIC_LABELS.get(c, c)}</th>' for c in METRIC_COLS)
 
@@ -158,7 +264,55 @@ def build_html(df: pd.DataFrame, min_period: str = "", max_period: str = "") -> 
 </table>
 </div>
 
-<!-- 图表：毛利率 & ROE 对比 -->
+<!-- 相对吸引力矩阵（补充模块J） -->
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">📊 相对吸引力矩阵（模块J）— 跨行业比较排序</h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted small">
+            综合评分 = 增长吸引力(30%) + 质量吸引力(40%) + 颠覆防御力(15%) + 周期稳定性(15%)。<br>
+            <strong>🔥 高分</strong> = 高增长+高质量+低颠覆风险+稳定周期 | 
+            <strong>⚠️ 低分</strong> = 低增长+低质量+高颠覆风险+强周期波动
+        </p>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>类别</th>
+                        <th>行业</th>
+                        <th class="text-end">📈 增长吸引力</th>
+                        <th class="text-end">🛡️ 质量吸引力</th>
+                        <th>🔄 周期类型</th>
+                        <th>💥 颠覆风险</th>
+                        <th class="text-end"><strong>★ 综合</strong></th>
+                    </tr>
+                </thead>
+                <tbody>{attract_html}</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 散点图：增长 vs 质量 -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body chart-container">
+                <canvas id="chartAttractMatrix" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body chart-container">
+                <canvas id="chartCycleDistribution" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 原有图表 -->
 <div class="row">
     <div class="col-md-6 chart-container">
         <canvas id="chartProfit"></canvas>
@@ -168,7 +322,6 @@ def build_html(df: pd.DataFrame, min_period: str = "", max_period: str = "") -> 
     </div>
 </div>
 
-<!-- 图表：研发强度 & 网络强度 -->
 <div class="row">
     <div class="col-md-6 chart-container">
         <canvas id="chartRD"></canvas>
@@ -248,6 +401,64 @@ new Chart(document.getElementById('chartHHI'), {{
             x: {{ title: {{ display: true, text: 'HHI' }} }},
             y: {{ title: {{ display: true, text: '毛利率 (%)' }} }}
         }}
+    }}
+}});
+
+// 相对吸引力散点图（补充模块J）
+new Chart(document.getElementById('chartAttractMatrix'), {{
+    type: 'scatter',
+    data: {{
+        datasets: [{{
+            label: '行业定位',
+            data: data.map(d => ({{ x: d.quality_score||0, y: d.growth_score||0 }})),
+            backgroundColor: data.map(d => {{
+                if (d.attractiveness >= 50) return 'rgba(40,167,69,0.7)';   // 绿：高吸引力
+                if (d.attractiveness >= 40) return 'rgba(255,193,7,0.7)';   // 黄：中吸引力
+                return 'rgba(220,53,69,0.7)';                                 // 红：低吸引力
+            }}),
+            pointRadius: 8,
+        }}]
+    }},
+    options: {{
+        responsive: true,
+        plugins: {{
+            title: {{ display: true, text: '行业相对吸引力矩阵 🔥增长 vs 🛡️质量' }},
+            tooltip: {{
+                callbacks: {{
+                    label: function(ctx) {{
+                        const idx = ctx.dataIndex;
+                        const d = data[idx];
+                        return d.name + ' | 增长:' + d.growth_score + ' 质量:' + d.quality_score + ' 综合:' + d.attractiveness;
+                    }}
+                }}
+            }}
+        }},
+        scales: {{
+            x: {{ title: {{ display: true, text: '质量吸引力 (0-100)' }}, min: 0, max: 100 }},
+            y: {{ title: {{ display: true, text: '增长吸引力 (0-100)' }}, min: 0, max: 100 }}
+        }}
+    }}
+}});
+
+// 周期分布图
+new Chart(document.getElementById('chartCycleDistribution'), {{
+    type: 'doughnut',
+    data: {{
+        labels: ['强周期', '弱周期', '成长周期', '弱防御', '强防御'],
+        datasets: [{{
+            data: [
+                data.filter(d => d.cycle_type === '强周期').length,
+                data.filter(d => d.cycle_type === '弱周期').length,
+                data.filter(d => d.cycle_type === '成长周期').length,
+                data.filter(d => d.cycle_type === '弱防御').length,
+                data.filter(d => d.cycle_type === '强防御').length,
+            ],
+            backgroundColor: ['#dc3545', '#ffc107', '#28a745', '#17a2b8', '#007bff'],
+        }}]
+    }},
+    options: {{
+        responsive: true,
+        plugins: {{ title: {{ display: true, text: '行业周期类型分布' }} }}
     }}
 }});
 </script>
