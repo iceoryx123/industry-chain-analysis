@@ -1,697 +1,548 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>产业链结构性分析 · 对比仪表盘</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>产业链指标对比仪表盘 - 申万一级行业</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: -apple-system, 'Segoe UI', sans-serif; background: #f5f7fa; color: #333; }
-  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
-  h1 { font-size: 24px; margin-bottom: 8px; }
-  .subtitle { color: #666; margin-bottom: 24px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
-  .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  .card h2 { font-size: 16px; margin-bottom: 16px; color: #1a73e8; }
-  canvas { max-height: 280px; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eee; }
-  th { background: #f8f9fa; font-weight: 600; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px;
-            font-size: 12px; background: #e8f0fe; color: #1a73e8; }
-  .dim-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-  .dim-item { text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; font-size: 12px; }
-  .dim-value { font-size: 18px; font-weight: 700; color: #1a73e8; }
-  .footer { margin-top: 24px; color: #999; font-size: 12px; text-align: center; }
+    body { padding: 20px; background: #f8f9fa; }
+    .table { font-size: 13px; white-space: nowrap; }
+    .sticky-col { position: sticky; left: 0; background: white; z-index: 1; }
+    .chart-container { margin: 20px 0; }
+    .filter-btn { margin: 2px; }
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>🏭 产业链结构性分析 · 对比仪表盘</h1>
-  <p class="subtitle">数据更新时间：2026-06-05 11:41 | 共 60 个行业案例</p>
+<div class="container-fluid">
+<h1 class="mb-3">📊 产业链指标对比仪表盘</h1>
+<p class="text-muted">基于申万一级行业分类 | 更新日期：2026-06-05 | 数据来源：akshare / yfinance / 公开统计</p>
 
-  <div class="card">
-    <h2>📊 核心指标对比</h2>
-    <canvas id="mainChart"></canvas>
-  </div>
+<!-- 类别筛选 -->
+<div class="mb-3">
+    <button class="btn btn-sm btn-outline-primary filter-btn active" onclick="filterCat('all')">全部</button>
+    <button class="btn btn-sm btn-outline-secondary filter-btn" onclick="filterCat('01-Traditional')">🏭 传统</button>
+    <button class="btn btn-sm btn-outline-success filter-btn" onclick="filterCat('02-Platform')">🌐 平台</button>
+    <button class="btn btn-sm btn-outline-warning filter-btn" onclick="filterCat('03-Regulated')">🏛️ 受监管</button>
+    <button class="btn btn-sm btn-outline-danger filter-btn" onclick="filterCat('04-Emerging')">🚀 新兴</button>
+</div>
 
-  <div class="card">
-    <h2>📋 全部行业数据</h2>
-    <div style="overflow-x:auto;">
-    <table>
-      <thead><tr>
-        <th>行业代码</th><th>行业名称</th><th>申万分类</th>
-        <th>毛利率</th><th>ROE</th><th>研发强度</th>
-        <th>网络强度</th><th>平台用户(百万)</th>
-      </tr></thead>
-      <tbody>
-      <tr><td><span class='badge'>110000-15</span></td><td>农业与食品饮料</td><td>农林牧渔</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>120000-09</span></td><td>消费</td><td>食品饮料</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>150000-01</span></td><td>儿科医院</td><td>医药生物</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>150000-02</span></td><td>口腔医院</td><td>医药生物</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>150000-05</span></td><td>医药</td><td>医药生物</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>160000-08</span></td><td>公用事业</td><td>公用事业</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>170000-04</span></td><td>民航机场</td><td>交通运输</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>170000-16</span></td><td>交通运输</td><td>交通运输</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>180000-07</span></td><td>房地产</td><td>房地产</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>200000-03</span></td><td>墓园</td><td>社会服务</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>200000-18</span></td><td>教育</td><td>社会服务</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>200000-24</span></td><td>检验检测与认证(TIC)</td><td>社会服务</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>250000-14</span></td><td>军工</td><td>国防军工</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>250000-25</span></td><td>商业航天</td><td>国防军工</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>280000-13</span></td><td>科技硬件</td><td>电子</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>280000-22</span></td><td>精密仪器</td><td>电子</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>290000-11</span></td><td>互联网</td><td>计算机</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>290000-19</span></td><td>科技行业</td><td>计算机</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>290000-20</span></td><td>AI行业</td><td>计算机</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>300000-17</span></td><td>传媒</td><td>传媒</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>320000-06</span></td><td>金融</td><td>银行</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>330000-23</span></td><td>金融数据与交易所</td><td>非银金融</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>370000-10</span></td><td>能源</td><td>石油石化</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>380000-26</span></td><td>化工新材料</td><td>基础化工</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>390000-12</span></td><td>制造业</td><td>机械设备</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>390000-21</span></td><td>机器人</td><td>机械设备</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801010</span></td><td>农林牧渔</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801020</span></td><td>基础化工</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801030</span></td><td>钢铁</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801040</span></td><td>有色金属</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801050</span></td><td>电子</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801060</span></td><td>计算机</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801070</span></td><td>汽车</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801080</span></td><td>建筑装饰</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801090</span></td><td>传媒</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801100</span></td><td>建筑材料</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801110</span></td><td>机械设备</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801120</span></td><td>电力设备</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801130</span></td><td>社会服务</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801140</span></td><td>银行</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801150</span></td><td>医药生物</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801160</span></td><td>非银金融</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801170</span></td><td>通信</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801180</span></td><td>房地产</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801190</span></td><td>公用事业</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801200</span></td><td>纺织服饰</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801210</span></td><td>轻工制造</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801220</span></td><td>环保</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801230</span></td><td>交通运输</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801710</span></td><td>国防军工</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801720</span></td><td>美容护理</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801730</span></td><td>家用电器</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801740</span></td><td>商贸零售</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801750</span></td><td>食品饮料</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801760</span></td><td>农林牧渔</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801770</span></td><td>电力设备</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801780</span></td><td>石油石化</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801790</span></td><td>煤炭</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801880</span></td><td>机器人</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr><tr><td><span class='badge'>801890</span></td><td>综合</td><td></td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.00</td><td>0</td></tr>
-      </tbody>
-    </table>
+<!-- 对比表格 -->
+<div class="table-responsive mb-4">
+<table class="table table-striped table-hover table-sm" id="compTable">
+<thead class="table-dark sticky-top">
+<tr>
+    <th>类别</th>
+    <th>行业</th>
+    <th>代码</th>
+    <th>细分</th>
+    <th class="text-end">市场规模(亿元)</th><th class="text-end">CR4</th><th class="text-end">HHI</th><th class="text-end">毛利率</th><th class="text-end">ROE</th><th class="text-end">研发强度</th><th class="text-end">网络强度</th><th class="text-end">平台用户(百万)</th><th class="text-end">平均交易额(元)</th>
+</tr>
+</thead>
+<tbody><tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>农业与食品饮料</strong></td>
+            <td><small class="text-muted">110000-15</small></td>
+            <td><small>农业综合</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>消费</strong></td>
+            <td><small class="text-muted">120000-09</small></td>
+            <td><small>消费综合</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>儿科医院</strong></td>
+            <td><small class="text-muted">150000-01</small></td>
+            <td><small>医疗服务</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>口腔医院</strong></td>
+            <td><small class="text-muted">150000-02</small></td>
+            <td><small>医疗服务</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>医药</strong></td>
+            <td><small class="text-muted">150000-05</small></td>
+            <td><small>医药商业</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>公用事业</strong></td>
+            <td><small class="text-muted">160000-08</small></td>
+            <td><small>电力水务燃气</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>民航机场</strong></td>
+            <td><small class="text-muted">170000-04</small></td>
+            <td><small>机场航空</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>交通运输</strong></td>
+            <td><small class="text-muted">170000-16</small></td>
+            <td><small>物流运输</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>房地产</strong></td>
+            <td><small class="text-muted">180000-07</small></td>
+            <td><small>房地产开发</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>墓园</strong></td>
+            <td><small class="text-muted">200000-03</small></td>
+            <td><small>殡葬服务</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>教育</strong>🌐</td>
+            <td><small class="text-muted">200000-18</small></td>
+            <td><small>教育</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>检验检测与认证(TIC)</strong></td>
+            <td><small class="text-muted">200000-24</small></td>
+            <td><small>专业服务</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>军工</strong></td>
+            <td><small class="text-muted">250000-14</small></td>
+            <td><small>军工装备</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>商业航天</strong></td>
+            <td><small class="text-muted">250000-25</small></td>
+            <td><small>航天装备</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>科技硬件</strong></td>
+            <td><small class="text-muted">280000-13</small></td>
+            <td><small>消费电子</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>精密仪器</strong></td>
+            <td><small class="text-muted">280000-22</small></td>
+            <td><small>仪器仪表</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>互联网</strong>🌐</td>
+            <td><small class="text-muted">290000-11</small></td>
+            <td><small>互联网服务</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>科技行业</strong>🌐</td>
+            <td><small class="text-muted">290000-19</small></td>
+            <td><small>IT服务</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>AI行业</strong>🌐</td>
+            <td><small class="text-muted">290000-20</small></td>
+            <td><small>人工智能</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>传媒</strong>🌐</td>
+            <td><small class="text-muted">300000-17</small></td>
+            <td><small>文化传媒</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>金融</strong></td>
+            <td><small class="text-muted">320000-06</small></td>
+            <td><small>银行业</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>金融数据与交易所</strong>🌐</td>
+            <td><small class="text-muted">330000-23</small></td>
+            <td><small>金融信息服务</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>能源</strong></td>
+            <td><small class="text-muted">370000-10</small></td>
+            <td><small>能源综合</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>化工新材料</strong></td>
+            <td><small class="text-muted">380000-26</small></td>
+            <td><small>化工新材料</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>制造业</strong></td>
+            <td><small class="text-muted">390000-12</small></td>
+            <td><small>通用设备</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="申万一级行业">
+            <td><span class="badge bg-secondary">申万一级行业</span></td>
+            <td><strong>机器人</strong></td>
+            <td><small class="text-muted">390000-21</small></td>
+            <td><small>自动化设备</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>农林牧渔</strong></td>
+            <td><small class="text-muted">801010</small></td>
+            <td><small>Agriculture & Food</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>基础化工</strong></td>
+            <td><small class="text-muted">801020</small></td>
+            <td><small>Chemicals & New Materials</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>钢铁</strong></td>
+            <td><small class="text-muted">801030</small></td>
+            <td><small>Steel & Metals</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>有色金属</strong></td>
+            <td><small class="text-muted">801040</small></td>
+            <td><small>Non-ferrous Metals</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>电子</strong></td>
+            <td><small class="text-muted">801050</small></td>
+            <td><small>Electronics</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="02-Platform">
+            <td><span class="badge bg-secondary">🌐 平台型</span></td>
+            <td><strong>计算机</strong>🌐</td>
+            <td><small class="text-muted">801060</small></td>
+            <td><small>Computing & Software</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>汽车</strong></td>
+            <td><small class="text-muted">801070</small></td>
+            <td><small>Automotive</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>建筑装饰</strong></td>
+            <td><small class="text-muted">801080</small></td>
+            <td><small>Construction & Decoration</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="02-Platform">
+            <td><span class="badge bg-secondary">🌐 平台型</span></td>
+            <td><strong>传媒</strong>🌐</td>
+            <td><small class="text-muted">801090</small></td>
+            <td><small>Media & Internet</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>建筑材料</strong></td>
+            <td><small class="text-muted">801100</small></td>
+            <td><small>Building Materials</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>机械设备</strong></td>
+            <td><small class="text-muted">801110</small></td>
+            <td><small>Machinery & Equipment</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>电力设备</strong></td>
+            <td><small class="text-muted">801120</small></td>
+            <td><small>Electrical Equipment</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="02-Platform">
+            <td><span class="badge bg-secondary">🌐 平台型</span></td>
+            <td><strong>社会服务</strong>🌐</td>
+            <td><small class="text-muted">801130</small></td>
+            <td><small>Social Services & Platform</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="03-Regulated">
+            <td><span class="badge bg-secondary">🏛️ 受监管</span></td>
+            <td><strong>银行</strong></td>
+            <td><small class="text-muted">801140</small></td>
+            <td><small>Banking</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>医药生物</strong></td>
+            <td><small class="text-muted">801150</small></td>
+            <td><small>Healthcare</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="03-Regulated">
+            <td><span class="badge bg-secondary">🏛️ 受监管</span></td>
+            <td><strong>非银金融</strong></td>
+            <td><small class="text-muted">801160</small></td>
+            <td><small>Non-bank Finance</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="02-Platform">
+            <td><span class="badge bg-secondary">🌐 平台型</span></td>
+            <td><strong>通信</strong>🌐</td>
+            <td><small class="text-muted">801170</small></td>
+            <td><small>Telecom & Network</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="03-Regulated">
+            <td><span class="badge bg-secondary">🏛️ 受监管</span></td>
+            <td><strong>房地产</strong></td>
+            <td><small class="text-muted">801180</small></td>
+            <td><small>Real Estate</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="03-Regulated">
+            <td><span class="badge bg-secondary">🏛️ 受监管</span></td>
+            <td><strong>公用事业</strong></td>
+            <td><small class="text-muted">801190</small></td>
+            <td><small>Utilities</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>纺织服饰</strong></td>
+            <td><small class="text-muted">801200</small></td>
+            <td><small>Textile & Apparel</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>轻工制造</strong></td>
+            <td><small class="text-muted">801210</small></td>
+            <td><small>Light Manufacturing</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="03-Regulated">
+            <td><span class="badge bg-secondary">🏛️ 受监管</span></td>
+            <td><strong>环保</strong></td>
+            <td><small class="text-muted">801220</small></td>
+            <td><small>Environmental Protection</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>交通运输</strong></td>
+            <td><small class="text-muted">801230</small></td>
+            <td><small>Transportation</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="04-Emerging">
+            <td><span class="badge bg-secondary">🚀 新兴/跨界</span></td>
+            <td><strong>国防军工</strong></td>
+            <td><small class="text-muted">801710</small></td>
+            <td><small>Defense & Aerospace</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>美容护理</strong></td>
+            <td><small class="text-muted">801720</small></td>
+            <td><small>Beauty & Personal Care</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>家用电器</strong></td>
+            <td><small class="text-muted">801730</small></td>
+            <td><small>Home Appliances</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>商贸零售</strong></td>
+            <td><small class="text-muted">801740</small></td>
+            <td><small>Retail & Commerce</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>食品饮料</strong></td>
+            <td><small class="text-muted">801750</small></td>
+            <td><small>Food & Beverage</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>石油石化</strong></td>
+            <td><small class="text-muted">801780</small></td>
+            <td><small>Petroleum & Petrochemical</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="04-Emerging">
+            <td><span class="badge bg-secondary">🚀 新兴/跨界</span></td>
+            <td><strong>煤炭</strong></td>
+            <td><small class="text-muted">801790</small></td>
+            <td><small>Coal & Energy Mining</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="04-Emerging">
+            <td><span class="badge bg-secondary">🚀 新兴/跨界</span></td>
+            <td><strong>机器人</strong>🌐</td>
+            <td><small class="text-muted">801880</small></td>
+            <td><small>Robotics & AI Hardware</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+<tr data-category="01-Traditional">
+            <td><span class="badge bg-secondary">🏭 传统产业</span></td>
+            <td><strong>综合</strong></td>
+            <td><small class="text-muted">801890</small></td>
+            <td><small>Conglomerate</small></td>
+            <td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td><td class="text-end">-</td>
+        </tr>
+</tbody>
+</table>
+</div>
+
+<!-- 图表：毛利率 & ROE 对比 -->
+<div class="row">
+    <div class="col-md-6 chart-container">
+        <canvas id="chartProfit"></canvas>
     </div>
-  </div>
+    <div class="col-md-6 chart-container">
+        <canvas id="chartNetwork"></canvas>
+    </div>
+</div>
 
-  <div class="card">
-    <h2>📈 按行业维度分布</h2>
-    <div class="dim-grid" id="dimGrid"></div>
-  </div>
-
-  <div class="footer">
-    自动生成于 2026-06-05 11:41 · <a href="https://github.com/iceoryx123/industry-chain-analysis" target="_blank">industry-chain-analysis</a>
-  </div>
+<!-- 图表：研发强度 & 网络强度 -->
+<div class="row">
+    <div class="col-md-6 chart-container">
+        <canvas id="chartRD"></canvas>
+    </div>
+    <div class="col-md-6 chart-container">
+        <canvas id="chartHHI"></canvas>
+    </div>
 </div>
 
 <script>
-const data = [
-  {
-    "code": "110000-15",
-    "name": "农业与食品饮料",
-    "industry": "农林牧渔",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "120000-09",
-    "name": "消费",
-    "industry": "食品饮料",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "150000-01",
-    "name": "儿科医院",
-    "industry": "医药生物",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "150000-02",
-    "name": "口腔医院",
-    "industry": "医药生物",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "150000-05",
-    "name": "医药",
-    "industry": "医药生物",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "160000-08",
-    "name": "公用事业",
-    "industry": "公用事业",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "170000-04",
-    "name": "民航机场",
-    "industry": "交通运输",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "170000-16",
-    "name": "交通运输",
-    "industry": "交通运输",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "180000-07",
-    "name": "房地产",
-    "industry": "房地产",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "200000-03",
-    "name": "墓园",
-    "industry": "社会服务",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "200000-18",
-    "name": "教育",
-    "industry": "社会服务",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "200000-24",
-    "name": "检验检测与认证(TIC)",
-    "industry": "社会服务",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "250000-14",
-    "name": "军工",
-    "industry": "国防军工",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "250000-25",
-    "name": "商业航天",
-    "industry": "国防军工",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "280000-13",
-    "name": "科技硬件",
-    "industry": "电子",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "280000-22",
-    "name": "精密仪器",
-    "industry": "电子",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "290000-11",
-    "name": "互联网",
-    "industry": "计算机",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "290000-19",
-    "name": "科技行业",
-    "industry": "计算机",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "290000-20",
-    "name": "AI行业",
-    "industry": "计算机",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "300000-17",
-    "name": "传媒",
-    "industry": "传媒",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "320000-06",
-    "name": "金融",
-    "industry": "银行",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "330000-23",
-    "name": "金融数据与交易所",
-    "industry": "非银金融",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "370000-10",
-    "name": "能源",
-    "industry": "石油石化",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "380000-26",
-    "name": "化工新材料",
-    "industry": "基础化工",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "390000-12",
-    "name": "制造业",
-    "industry": "机械设备",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "390000-21",
-    "name": "机器人",
-    "industry": "机械设备",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801010",
-    "name": "农林牧渔",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801020",
-    "name": "基础化工",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801030",
-    "name": "钢铁",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801040",
-    "name": "有色金属",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801050",
-    "name": "电子",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801060",
-    "name": "计算机",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801070",
-    "name": "汽车",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801080",
-    "name": "建筑装饰",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801090",
-    "name": "传媒",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801100",
-    "name": "建筑材料",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801110",
-    "name": "机械设备",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801120",
-    "name": "电力设备",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801130",
-    "name": "社会服务",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801140",
-    "name": "银行",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801150",
-    "name": "医药生物",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801160",
-    "name": "非银金融",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801170",
-    "name": "通信",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801180",
-    "name": "房地产",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801190",
-    "name": "公用事业",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801200",
-    "name": "纺织服饰",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801210",
-    "name": "轻工制造",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801220",
-    "name": "环保",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801230",
-    "name": "交通运输",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801710",
-    "name": "国防军工",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801720",
-    "name": "美容护理",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801730",
-    "name": "家用电器",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801740",
-    "name": "商贸零售",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801750",
-    "name": "食品饮料",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801760",
-    "name": "农林牧渔",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801770",
-    "name": "电力设备",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801780",
-    "name": "石油石化",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801790",
-    "name": "煤炭",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801880",
-    "name": "机器人",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  },
-  {
-    "code": "801890",
-    "name": "综合",
-    "industry": "",
-    "gross_margin": 0.0,
-    "roe": 0.0,
-    "rd_intensity": 0.0,
-    "network_intensity": 0.0,
-    "platform_users_million": 0.0
-  }
-];
-const labels = data.map(d => d.name);
-const datasets = [
-  { label: '毛利率', data: data.map(d => (d.gross_margin*100).toFixed(1)), backgroundColor: '#4285f4' },
-  { label: 'ROE', data: data.map(d => (d.roe*100).toFixed(1)), backgroundColor: '#ea4335' },
-  { label: '研发强度', data: data.map(d => (d.rd_intensity*100).toFixed(1)), backgroundColor: '#fbbc05' },
-  { label: '网络强度', data: data.map(d => (d.network_intensity*10).toFixed(1)), backgroundColor: '#34a853' },
-];
+const data = [{"name":"\u519c\u4e1a\u4e0e\u98df\u54c1\u996e\u6599","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u6d88\u8d39","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u513f\u79d1\u533b\u9662","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u53e3\u8154\u533b\u9662","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u533b\u836f","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u516c\u7528\u4e8b\u4e1a","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u6c11\u822a\u673a\u573a","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u4ea4\u901a\u8fd0\u8f93","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u623f\u5730\u4ea7","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u5893\u56ed","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u6559\u80b2","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u68c0\u9a8c\u68c0\u6d4b\u4e0e\u8ba4\u8bc1(TIC)","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u519b\u5de5","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u5546\u4e1a\u822a\u5929","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u79d1\u6280\u786c\u4ef6","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u7cbe\u5bc6\u4eea\u5668","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u4e92\u8054\u7f51","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u79d1\u6280\u884c\u4e1a","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"AI\u884c\u4e1a","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u4f20\u5a92","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u91d1\u878d","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u91d1\u878d\u6570\u636e\u4e0e\u4ea4\u6613\u6240","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u80fd\u6e90","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u5316\u5de5\u65b0\u6750\u6599","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u5236\u9020\u4e1a","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u673a\u5668\u4eba","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u519c\u6797\u7267\u6e14","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u57fa\u7840\u5316\u5de5","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u94a2\u94c1","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u6709\u8272\u91d1\u5c5e","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u7535\u5b50","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u8ba1\u7b97\u673a","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u6c7d\u8f66","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u5efa\u7b51\u88c5\u9970","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u4f20\u5a92","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u5efa\u7b51\u6750\u6599","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u673a\u68b0\u8bbe\u5907","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u7535\u529b\u8bbe\u5907","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u793e\u4f1a\u670d\u52a1","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u94f6\u884c","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u533b\u836f\u751f\u7269","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u975e\u94f6\u91d1\u878d","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u901a\u4fe1","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u623f\u5730\u4ea7","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u516c\u7528\u4e8b\u4e1a","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u7eba\u7ec7\u670d\u9970","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u8f7b\u5de5\u5236\u9020","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u73af\u4fdd","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u4ea4\u901a\u8fd0\u8f93","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u56fd\u9632\u519b\u5de5","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u7f8e\u5bb9\u62a4\u7406","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u5bb6\u7528\u7535\u5668","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u5546\u8d38\u96f6\u552e","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u98df\u54c1\u996e\u6599","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u77f3\u6cb9\u77f3\u5316","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u7164\u70ad","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u673a\u5668\u4eba","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0},{"name":"\u7efc\u5408","gross_margin":0.0,"roe":0.0,"network_intensity":0.0,"rd_intensity":0.0}];
 
-new Chart(document.getElementById('mainChart'), {
-  type: 'bar',
-  data: { labels, datasets },
-  options: {
-    responsive: true,
-    plugins: { legend: { position: 'top' } },
-    scales: { y: { beginAtZero: true } }
-  }
+function filterCat(cat) {
+    const rows = document.querySelectorAll('#compTable tbody tr');
+    rows.forEach(r => {
+        if (cat === 'all' || r.dataset.category === cat) {
+            r.style.display = '';
+        } else {
+            r.style.display = 'none';
+        }
+    });
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// 利润率对比图
+new Chart(document.getElementById('chartProfit'), {
+    type: 'bar',
+    data: {
+        labels: data.map(d => d.name),
+        datasets: [
+            { label: '毛利率', data: data.map(d => (d.gross_margin||0)*100), backgroundColor: 'rgba(54,162,235,0.7)' },
+            { label: 'ROE', data: data.map(d => (d.roe||0)*100), backgroundColor: 'rgba(255,99,132,0.7)' },
+        ]
+    },
+    options: { responsive: true, plugins: { title: { display: true, text: '盈利能力对比 (%)' } } } 
 });
 
-// 维度最大值分布
-const dimGrid = document.getElementById('dimGrid');
-const keys = ['gross_margin','roe','rd_intensity','network_intensity','platform_users_million'];
-const names = ['毛利率','ROE','研发强度','网络强度','平台用户'];
-keys.forEach((key, i) => {
-  const vals = data.map(d => d[key]).filter(v => v > 0);
-  const max = vals.length > 0 ? Math.max(...vals) : 0;
-  const avg = vals.length > 0 ? (vals.reduce((a,b) => a+b, 0) / vals.length) : 0;
-  dimGrid.innerHTML += `<div class="dim-item"><div class="dim-value">${max.toFixed(2)}</div><div>${names[i]} (最高)</div><div style="font-size:11px;color:#999;">均值 ${avg.toFixed(2)}</div></div>`;
+// 网络强度图
+new Chart(document.getElementById('chartNetwork'), {
+    type: 'bar',
+    data: {
+        labels: data.map(d => d.name),
+        datasets: [
+            { label: '网络强度', data: data.map(d => (d.network_intensity||0)*100), backgroundColor: 'rgba(75,192,192,0.7)' },
+        ]
+    },
+    options: { responsive: true, plugins: { title: { display: true, text: '网络效应强度 (%)' } } } 
+});
+
+// 研发强度图
+new Chart(document.getElementById('chartRD'), {
+    type: 'bar',
+    data: {
+        labels: data.map(d => d.name),
+        datasets: [
+            { label: '研发强度', data: data.map(d => (d.rd_intensity||0)*100), backgroundColor: 'rgba(153,102,255,0.7)' },
+        ]
+    },
+    options: { responsive: true, plugins: { title: { display: true, text: '研发投入强度 (%)' } } } 
+});
+
+// HHI 散点图
+new Chart(document.getElementById('chartHHI'), {
+    type: 'scatter',
+    data: {
+        datasets: [{
+            label: 'HHI vs 毛利率',
+            data: data.map(d => ({ x: d.hhi||0, y: (d.gross_margin||0)*100 })),
+            backgroundColor: 'rgba(255,159,64,0.7)'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { title: { display: true, text: '市场集中度 vs 毛利率' } },
+        scales: {
+            x: { title: { display: true, text: 'HHI' } },
+            y: { title: { display: true, text: '毛利率 (%)' } }
+        }
+    }
 });
 </script>
+</div>
 </body>
 </html>

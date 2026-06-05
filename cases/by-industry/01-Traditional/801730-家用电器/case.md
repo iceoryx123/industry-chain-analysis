@@ -1,18 +1,18 @@
 ---
-title: "食品饮料产业链分析"
-industry_code: "801750"
+title: "家用电器产业链分析"
+industry_code: "801730"
 version: "v9.2"
-subsector: "Food & Beverage"
+subsector: "Home Appliances"
 date: "2026-06-05"
 authors:
   - "自动生成"
-tags: ["食品饮料", "Food & Beverage", "申万一级"]
+tags: ["家用电器", "Home Appliances", "申万一级"]
 ---
 
 # 1️⃣ 版本选择
 > 本案例使用 **v9.2** 框架。
 
-**选择理由**：食品饮料 属于 Food & Beverage 类别，{{ "具有显著网络效应，适合双模分析。" if version == "v10.x" else "产业链结构相对线性，适合传统四层链分析。" }}
+**选择理由**：家用电器 属于 Home Appliances 类别，产业链结构相对线性，适合传统四层链分析。
 
 ## 2️⃣ 产业链全景
 
@@ -82,9 +82,9 @@ tags: ["食品饮料", "Food & Beverage", "申万一级"]
 
 ### 🔍 自动洞见（基于规则引擎）
 
-**行业**：食品饮料 | **类别**：04-Emerging | **细分**：Food & Beverage | **版本**：传统(v9.2)
+**行业**：家用电器 | **类别**：01-Traditional | **细分**：Home Appliances | **版本**：传统(v9.2)
 
-**价值枢纽识别**：食品饮料产业链关键环节（需进一步识别）
+**价值枢纽识别**：家用电器产业链关键环节（需进一步识别）
 
 **质量评分**（满分10）：
 - 🛡️ 护城河：1/10

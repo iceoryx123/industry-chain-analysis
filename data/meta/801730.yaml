@@ -1,6 +1,6 @@
 code: '801730'
 name: 家用电器
-category: 04-Emerging
+category: 01-Traditional
 subsector: Home Appliances
 has_network_effect: false
 update_cycle: quarterly

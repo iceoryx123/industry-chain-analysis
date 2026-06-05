@@ -1,18 +1,18 @@
 ---
-title: "农林牧渔产业链分析"
-industry_code: "801760"
+title: "美容护理产业链分析"
+industry_code: "801720"
 version: "v9.2"
-subsector: "Agriculture Advanced"
+subsector: "Beauty & Personal Care"
 date: "2026-06-05"
 authors:
   - "自动生成"
-tags: ["农林牧渔", "Agriculture Advanced", "申万一级"]
+tags: ["美容护理", "Beauty & Personal Care", "申万一级"]
 ---
 
 # 1️⃣ 版本选择
 > 本案例使用 **v9.2** 框架。
 
-**选择理由**：农林牧渔 属于 Agriculture Advanced 类别，{{ "具有显著网络效应，适合双模分析。" if version == "v10.x" else "产业链结构相对线性，适合传统四层链分析。" }}
+**选择理由**：美容护理 属于 Beauty & Personal Care 类别，产业链结构相对线性，适合传统四层链分析。
 
 ## 2️⃣ 产业链全景
 
@@ -82,9 +82,9 @@ tags: ["农林牧渔", "Agriculture Advanced", "申万一级"]
 
 ### 🔍 自动洞见（基于规则引擎）
 
-**行业**：农林牧渔 | **类别**：04-Emerging | **细分**：Agriculture Advanced | **版本**：传统(v9.2)
+**行业**：美容护理 | **类别**：01-Traditional | **细分**：Beauty & Personal Care | **版本**：传统(v9.2)
 
-**价值枢纽识别**：农林牧渔产业链关键环节（需进一步识别）
+**价值枢纽识别**：美容护理产业链关键环节（需进一步识别）
 
 **质量评分**（满分10）：
 - 🛡️ 护城河：1/10

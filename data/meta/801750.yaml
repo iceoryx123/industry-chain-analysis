@@ -1,6 +1,6 @@
 code: '801750'
 name: 食品饮料
-category: 04-Emerging
+category: 01-Traditional
 subsector: Food & Beverage
 has_network_effect: false
 update_cycle: quarterly
