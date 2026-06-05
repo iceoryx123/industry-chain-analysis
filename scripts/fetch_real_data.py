@@ -60,16 +60,20 @@ def parse_num(val):
 
 
 def fetch_ticker_financial(ticker: str) -> dict:
-    """获取个股最新财务指标+历史趋势"""
+    """获取个股最新财务指标+历史趋势+周期位置（ROE历史百分位）"""
     result = {"gross_margin": None, "roe": None, "profit": None, "revenue": None,
-              "gm_trend": None, "roe_trend": None, "report_period": ""}
+              "gm_trend": None, "roe_trend": None, "report_period": "",
+              "cycle_position": "unknown", "cycle_score": 0}
     symbol = ticker.replace(".SH", "").replace(".SZ", "").replace(".BJ", "")
     try:
         df = ak.stock_financial_abstract_ths(symbol=symbol)
         if df.empty:
             return result
         df = df.sort_values("报告期", ascending=False)
-        # 收集最多4期数据用于趋势计算
+
+        # 收集所有ROE历史值用于百分位计算
+        all_roe = []
+        # 收集最近4期年度数据用于趋势计算
         gm_vals = []
         roe_vals = []
         latest = result
@@ -78,11 +82,8 @@ def fetch_ticker_financial(ticker: str) -> dict:
             roe = parse_pct(row.get("净资产收益率", False))
             profit = parse_num(row.get("净利润", False))
             revenue = parse_num(row.get("营业总收入", False))
-            if gm is not None:
-                gm_vals.append(gm)
-            if roe is not None:
-                roe_vals.append(roe)
-            # 最新一期数据作为当前值（即使毛利率为None，也要记录ROE等）
+
+            # 最新一期数据作为当前值
             if latest["gross_margin"] is None and (gm is not None or roe is not None):
                 latest = {
                     "gross_margin": gm if gm is not None else 0.0,
@@ -91,28 +92,49 @@ def fetch_ticker_financial(ticker: str) -> dict:
                     "gm_trend": 0.0, "roe_trend": 0.0,
                     "report_period": str(row.get("报告期", "")),
                 }
-            if len(gm_vals) >= 4 and len(roe_vals) >= 4:
-                break
 
-        # 计算趋势（最新 vs 最旧，年化变化）
+            # 收集年度数据（12-31结尾）用于趋势
+            period = str(row.get("报告期", ""))
+            if period.endswith("-12-31"):
+                if gm is not None:
+                    gm_vals.append(gm)
+                if roe is not None:
+                    roe_vals.append(roe)
+
+            # 收集所有ROE用于百分位计算
+            if roe is not None:
+                all_roe.append(roe)
+
+        # ── 趋势计算（最新 vs 最旧，年化变化） ──
         if len(gm_vals) >= 2:
-            # gm_vals[0]是最新, gm_vals[-1]是最旧
             gm_start = gm_vals[-1]
             gm_end = gm_vals[0]
             n_years = max(len(gm_vals) - 1, 1)
             if gm_start > 0:
                 latest["gm_trend"] = (gm_end - gm_start) / n_years
-            else:
-                latest["gm_trend"] = 0.0
-
         if len(roe_vals) >= 2:
             roe_start = roe_vals[-1]
             roe_end = roe_vals[0]
             n_years = max(len(roe_vals) - 1, 1)
             if roe_start != 0:
                 latest["roe_trend"] = (roe_end - roe_start) / n_years
+
+        # ── 周期位置：历史ROE百分位 ──
+        current_roe = latest.get("roe")
+        if all_roe and current_roe is not None:
+            cnt_below = sum(1 for v in all_roe if v <= current_roe)
+            percentile = cnt_below / len(all_roe)
+            latest["cycle_score"] = round(percentile * 100, 1)
+            if percentile < 0.2:
+                latest["cycle_position"] = "底部"
+            elif percentile < 0.4:
+                latest["cycle_position"] = "低位"
+            elif percentile < 0.6:
+                latest["cycle_position"] = "中位"
+            elif percentile < 0.8:
+                latest["cycle_position"] = "高位"
             else:
-                latest["roe_trend"] = 0.0
+                latest["cycle_position"] = "顶部"
 
         return latest
     except Exception as e:
@@ -172,6 +194,23 @@ def process_industry(meta: dict):
     market_size = avg_rev * 10 if avg_rev > 0 else 0.0
     has_net = meta.get("has_network_effect", False)
 
+    # ── 周期位置 ──
+    # 取第一个成功结果的周期位置（如果多股，取加权平均score + 第一个的position）
+    if results:
+        total_w = sum(w for w, _ in results)
+        avg_cycle_score = sum(w * r.get("cycle_score", 0) for w, r in results) / total_w
+        # 用第一个有结果的位置文字
+        first_pos = "unknown"
+        for _, r in results:
+            if r.get("cycle_position", "unknown") != "unknown":
+                first_pos = r["cycle_position"]
+                break
+        cycle_position = first_pos
+        cycle_score = round(avg_cycle_score, 1)
+    else:
+        cycle_position = "unknown"
+        cycle_score = 0
+
     record = {
         "date": datetime.date.today().isoformat(),
         "report_period": report_period,
@@ -186,6 +225,8 @@ def process_industry(meta: dict):
         "average_transaction_value_cny": 0.0,
         "gross_margin_trend": round(avg_gm_trend, 4),
         "roe_trend": round(avg_roe_trend, 4),
+        "cycle_position": cycle_position,
+        "cycle_score": cycle_score,
     }
 
     df = pd.DataFrame([record])

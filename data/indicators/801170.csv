@@ -1,2 +1,2 @@
-﻿date,report_period,market_size_cny_bn,cr4,hhi,gross_margin,roe,rd_intensity,network_intensity,platform_users_million,average_transaction_value_cny,gross_margin_trend,roe_trend
-2026-06-05,2026-03-31,10282.4,0.15,0.02,0.2373,0.0124,0.0,0.5,0.0,0.0,-0.0111,-0.0083
+﻿date,report_period,market_size_cny_bn,cr4,hhi,gross_margin,roe,rd_intensity,network_intensity,platform_users_million,average_transaction_value_cny,gross_margin_trend,roe_trend,cycle_position,cycle_score
+2026-06-05,2026-03-31,10282.4,0.15,0.02,0.2373,0.0124,0.0,0.5,0.0,0.0,-0.0078,0.0016,低位,25.3
