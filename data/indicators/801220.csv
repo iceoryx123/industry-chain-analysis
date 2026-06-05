@@ -1,2 +1,2 @@
-﻿date,market_size_cny_bn,cr4,hhi,gross_margin,roe,rd_intensity,network_intensity,platform_users_million,average_transaction_value_cny,gross_margin_trend,roe_trend
-2026-06-05,168.0,0.15,0.02,0.1765,0.0039,0.0,0.1,0.0,0.0,0.0076,0.0006
+﻿date,report_period,market_size_cny_bn,cr4,hhi,gross_margin,roe,rd_intensity,network_intensity,platform_users_million,average_transaction_value_cny,gross_margin_trend,roe_trend
+2026-06-05,2026-03-31,168.0,0.15,0.02,0.1765,0.0039,0.0,0.1,0.0,0.0,0.0076,0.0006

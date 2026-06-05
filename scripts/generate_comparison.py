@@ -39,6 +39,8 @@ CAT_LABELS = {
 
 def load_all():
     rows = []
+    min_period = ""
+    max_period = ""
     for csv_path in sorted(IND_DIR.glob("*.csv")):
         code = csv_path.stem
         meta_file = META_DIR / f"{code}.yaml"
@@ -58,8 +60,15 @@ def load_all():
         }
         for col in METRIC_COLS:
             row[col] = latest.get(col, 0)
+        # 采集报告期
+        rp = str(latest.get("report_period", ""))[:10] if latest.get("report_period") else ""
+        row["report_period"] = rp
+        if rp and (not min_period or rp < min_period):
+            min_period = rp
+        if rp and (not max_period or rp > max_period):
+            max_period = rp
         rows.append(row)
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows), min_period, max_period
 
 def fmt(v, col):
     if v is None or v == 0:
@@ -74,7 +83,7 @@ def fmt(v, col):
         return f"{float(v):.1f}"
     return str(v)
 
-def build_html(df: pd.DataFrame) -> str:
+def build_html(df: pd.DataFrame, min_period: str = "", max_period: str = "") -> str:
     today = datetime.date.today().isoformat()
 
     # 构建表格行
@@ -101,7 +110,7 @@ def build_html(df: pd.DataFrame) -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>产业链指标对比仪表盘 - 申万一级行业</title>
+<title>产业链指标对比仪表盘 - 申万一级行业 - 数据至{max_period or today}</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -114,8 +123,15 @@ def build_html(df: pd.DataFrame) -> str:
 </head>
 <body>
 <div class="container-fluid">
+<div class="alert alert-info py-2 mb-3 small">
+    ⏱️ <strong>数据时效</strong>：
+    财务报告期 <strong>{max_period or "未知"}</strong>（{min_period or ""} 至 {max_period or "未知"}）｜
+    生成日期 {today} ｜
+    来源 <strong>akshare</strong>（东方财富/同花顺）｜
+    ⚠️ 数据过期后以下图表和结论可能失效
+</div>
 <h1 class="mb-3">📊 产业链指标对比仪表盘</h1>
-<p class="text-muted">基于申万一级行业分类 | 更新日期：{today} | 数据来源：akshare / yfinance / 公开统计</p>
+<p class="text-muted">基于申万一级行业分类 | 报告期：{max_period or today} | 生成：{today} | 来源：akshare</p>
 
 <!-- 类别筛选 -->
 <div class="mb-3">
@@ -245,12 +261,12 @@ def main():
     print("📊 生成跨行业对比仪表盘")
     print("=" * 60)
 
-    df = load_all()
+    df, min_period, max_period = load_all()
     if df.empty:
         print("⚠️ 无数据，请先生成指标 CSV")
         return
 
-    html = build_html(df)
+    html = build_html(df, min_period, max_period)
     out_path = OUT_DIR / "overview.html"
     out_path.write_text(html, encoding="utf-8")
 

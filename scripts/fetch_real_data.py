@@ -62,7 +62,7 @@ def parse_num(val):
 def fetch_ticker_financial(ticker: str) -> dict:
     """获取个股最新财务指标+历史趋势"""
     result = {"gross_margin": None, "roe": None, "profit": None, "revenue": None,
-              "gm_trend": None, "roe_trend": None}
+              "gm_trend": None, "roe_trend": None, "report_period": ""}
     symbol = ticker.replace(".SH", "").replace(".SZ", "").replace(".BJ", "")
     try:
         df = ak.stock_financial_abstract_ths(symbol=symbol)
@@ -89,6 +89,7 @@ def fetch_ticker_financial(ticker: str) -> dict:
                     "roe": roe if roe is not None else 0.0,
                     "profit": profit, "revenue": revenue,
                     "gm_trend": 0.0, "roe_trend": 0.0,
+                    "report_period": str(row.get("报告期", "")),
                 }
             if len(gm_vals) >= 4 and len(roe_vals) >= 4:
                 break
@@ -159,6 +160,8 @@ def process_industry(meta: dict):
     avg_rev = sum(w * r["revenue"] for w, r in results) / total_w
     avg_gm_trend = sum(w * r.get("gm_trend", 0.0) for w, r in results if r.get("gm_trend") is not None) / total_w
     avg_roe_trend = sum(w * r.get("roe_trend", 0.0) for w, r in results if r.get("roe_trend") is not None) / total_w
+    # 取最新的报告期（第一个成功结果的report_period）
+    report_period = results[0][1].get("report_period", "") if results else ""
 
     # ── 特殊规则覆盖 ──
     if special and "gross_margin_proxy" in special:
@@ -171,6 +174,7 @@ def process_industry(meta: dict):
 
     record = {
         "date": datetime.date.today().isoformat(),
+        "report_period": report_period,
         "market_size_cny_bn": round(market_size, 2),
         "cr4": 0.15,
         "hhi": 0.02,

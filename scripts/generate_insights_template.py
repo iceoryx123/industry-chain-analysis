@@ -28,6 +28,9 @@ def generate_insights(code: str, row: dict, meta: dict) -> str:
     mkt = float(row.get("market_size_cny_bn", 0) or 0)
     gm_trend = float(row.get("gross_margin_trend", 0) or 0)
     roe_trend = float(row.get("roe_trend", 0) or 0)
+    # ── 数据时效信息 ──
+    fetch_date = str(row.get("date", ""))[:10]
+    report_period = str(row.get("report_period", ""))[:10]
 
     # ── 1. 价值枢纽 ──
     if has_net:
@@ -139,6 +142,12 @@ def generate_insights(code: str, row: dict, meta: dict) -> str:
             suggestion = f"行业较为分散，需进一步细分识别潜在价值枢纽"
 
     return f"""### 🔍 自动洞见（基于规则引擎）
+
+> ⏱️ **数据时效说明**
+> - 毛利率/ROE 数据来源：**akshare（东方财富/同花顺）**
+> - 财务报告期：**{report_period or "未知"}**
+> - 数据拉取日期：**{fetch_date or "未知"}**
+> - ⚠️ 评分和结论基于上述时效的数据，**数据过期后结论可能失效**
 
 **行业**：{name} | **类别**：{cat} | **细分**：{sub} | **版本**：{"双模(v10.x)" if has_net else "传统(v9.2)"}
 
