@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""fetch_real_data.py
-从 akshare 抓取真实财务指标，填充 32 个申万行业的 CSV。
-分批执行，避免 rate limit。
+"""fetch_real_data.py v2
+从 akshare 抓取真实财务指标，支持多股平均 + 行业特殊处理。
 """
 
 import sys, datetime, time, yaml
@@ -13,63 +12,71 @@ META_DIR = ROOT / "data" / "meta"
 OUT_DIR = ROOT / "data" / "indicators"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-FIELDS = [
-    "date", "market_size_cny_bn", "cr4", "hhi", "gross_margin",
-    "roe", "rd_intensity", "network_intensity",
-    "platform_users_million", "average_transaction_value_cny",
-]
-
 import akshare as ak
 
+# ── 行业特殊处理规则 ──────────────────────────────────
+# 某些行业不适用标准毛利率，使用替代指标
+SPECIAL_RULES = {
+    "801140": {"name": "银行", "gross_margin_proxy": 0.35, "note": "用净息差/NIM替代"},  # 实际NIM~2%, 用营业毛利率口径
+    "801160": {"name": "非银金融", "gross_margin_proxy": 0.20, "note": "用营业利润率替代"},
+}
+
+# ── 多股配置 ──────────────────────────────────────────
+# key=行业代码, value=[(ticker, weight), ...]
+PEER_TICKERS = {
+    "801710": [("600893.SH", 1.0), ("600760.SH", 1.0)],   # 航发动力 + 中航沈飞
+    "801180": [("000002.SZ", 1.0), ("600048.SH", 1.0)],   # 万科A + 保利发展
+    "801880": [("300124.SZ", 1.0)],                         # 汇川技术（代替美的）
+    "801730": [("000333.SZ", 1.0), ("000651.SZ", 1.0)],   # 美的 + 格力
+    "801750": [("000895.SZ", 1.0), ("600519.SH", 1.0)],   # 双汇 + 茅台
+    "801150": [("300015.SZ", 1.0), ("600276.SH", 1.0), ("603259.SH", 1.0)],  # 爱尔 + 恒瑞 + 药明康德
+}
+
+
 def parse_pct(val):
-    """将 '87.79%' 或 False 转为浮点数"""
     if val is False or val is None:
-        return 0.0
+        return None
     if isinstance(val, str):
         return float(val.replace("%", "").strip()) / 100.0
     return float(val)
 
+
 def parse_num(val):
-    """将 '6.28亿' 等转为浮点数（亿为单位）"""
+    """将 '6.28亿' 或 '4140.45万' 转为浮点数（亿为单位）"""
     if val is False or val is None:
         return 0.0
     if isinstance(val, str):
         val = val.strip()
         if "万亿" in val:
-            return float(val.replace("万亿", "")) * 10000
+            return float(val.replace("万亿", "").replace(",", "")) * 10000
         elif "亿" in val:
-            return float(val.replace("亿", ""))
+            return float(val.replace("亿", "").replace(",", ""))
         elif "万" in val:
-            return float(val.replace("万", "")) / 10000
+            return float(val.replace("万", "").replace(",", "")) / 10000
         elif "元" in val:
-            return float(val.replace("元", "")) / 100000000
-        return float(val)
+            return float(val.replace("元", "").replace(",", "")) / 100000000
+        return float(val.replace(",", ""))
     return float(val)
+
 
 def fetch_ticker_financial(ticker: str) -> dict:
     """获取个股最新财务指标"""
-    result = {"gross_margin": 0.0, "roe": 0.0, "rd_intensity": 0.0,
-              "profit": 0.0, "revenue": 0.0}
-    # 去掉 .SH/.SZ 后缀
+    result = {"gross_margin": None, "roe": None, "profit": None, "revenue": None}
     symbol = ticker.replace(".SH", "").replace(".SZ", "").replace(".BJ", "")
     try:
         df = ak.stock_financial_abstract_ths(symbol=symbol)
         if df.empty:
             return result
-        # 取最新年报（报告期 = 某年12-31）或最新数据
-        # 找到最近一年的数据
         df = df.sort_values("报告期", ascending=False)
         for _, row in df.iterrows():
             gm = parse_pct(row.get("销售毛利率", False))
             roe = parse_pct(row.get("净资产收益率", False))
             profit = parse_num(row.get("净利润", False))
             revenue = parse_num(row.get("营业总收入", False))
-            # 只取有真实数据的行
-            if gm > 0 or roe > 0:
+            if gm is not None or roe is not None:
                 result = {
-                    "gross_margin": gm,
-                    "roe": roe,
-                    "rd_intensity": 0.0,  # 研发投入比例不可用
+                    "gross_margin": gm if gm is not None else 0.0,
+                    "roe": roe if roe is not None else 0.0,
                     "profit": profit,
                     "revenue": revenue,
                 }
@@ -80,72 +87,84 @@ def fetch_ticker_financial(ticker: str) -> dict:
         return result
 
 
-def build_csv(meta: dict, financial: dict):
-    """构建行业指标 CSV"""
+def process_industry(meta: dict):
     code = meta["code"]
     name = meta["name"]
     cat = meta.get("category", "")
+    primary_ticker = meta.get("representative_ticker", "")
+
+    csv_path = OUT_DIR / f"{code}.csv"
+    print(f"  📊 {code} {name}", end="")
+
+    # ── 特殊处理 ──
+    special = SPECIAL_RULES.get(code)
+
+    # ── 确定 ticker 列表 ──
+    tickers = PEER_TICKERS.get(code, [])
+    if not tickers and primary_ticker:
+        tickers = [(primary_ticker, 1.0)]
+
+    if not tickers:
+        print("  ⏭️ 无 ticker")
+        return
+
+    # ── 抓取所有 ticker ──
+    results = []
+    for tkr, wgt in tickers:
+        fin = fetch_ticker_financial(tkr)
+        if fin["gross_margin"] is not None or fin["roe"] is not None:
+            results.append((wgt, fin))
+        time.sleep(1.2)
+
+    if not results:
+        print("  ⚠️ 全部失败，用默认值")
+        return
+
+    # ── 加权平均 ──
+    total_w = sum(w for w, _ in results)
+    avg_gm = sum(w * r["gross_margin"] for w, r in results if r["gross_margin"] is not None) / total_w
+    avg_roe = sum(w * r["roe"] for w, r in results if r["roe"] is not None) / total_w
+    avg_rev = sum(w * r["revenue"] for w, r in results) / total_w
+
+    # ── 特殊规则覆盖 ──
+    if special and "gross_margin_proxy" in special:
+        avg_gm = special["gross_margin_proxy"]
+        print(f" [特殊: {special['note']}]", end="")
+
+    # ── 行业规模估算 ──
+    market_size = avg_rev * 10 if avg_rev > 0 else 0.0
     has_net = meta.get("has_network_effect", False)
 
-    today = datetime.date.today().isoformat()
-
-    # 行业规模估算
-    market_size = 0.0
-    if financial["revenue"] > 0:
-        # 用代表公司营收 * 行业集中度倒推 → 粗略估算
-        market_size = financial["revenue"] * 10  # 假设代表公司占10%份额
-
     record = {
-        "date": today,
+        "date": datetime.date.today().isoformat(),
         "market_size_cny_bn": round(market_size, 2),
-        "cr4": 0.15,     # 默认低集中度
-        "hhi": 0.02,     # 默认低 HHI
-        "gross_margin": round(financial["gross_margin"], 4),
-        "roe": round(financial["roe"], 4),
-        "rd_intensity": round(financial["rd_intensity"], 4),
+        "cr4": 0.15,
+        "hhi": 0.02,
+        "gross_margin": round(avg_gm, 4),
+        "roe": round(avg_roe, 4),
+        "rd_intensity": 0.0,
         "network_intensity": 0.5 if has_net else 0.1,
         "platform_users_million": 0.0,
         "average_transaction_value_cny": 0.0,
     }
-    return record
 
-
-def process_industry(meta: dict):
-    code = meta["code"]
-    name = meta["name"]
-    ticker = meta.get("representative_ticker", "")
-    csv_path = OUT_DIR / f"{code}.csv"
-
-    print(f"  📊 {code} {name} (ticker={ticker})")
-
-    if not ticker:
-        print(f"    ⏭️  无代表 ticker，跳过")
-        return
-
-    financial = fetch_ticker_financial(ticker)
-    record = build_csv(meta, financial)
-
-    # 写入 CSV
     df = pd.DataFrame([record])
     df.to_csv(csv_path, index=False, encoding="utf-8-sig")
-    print(f"    ✅ 毛利率={record['gross_margin']:.1%}, ROE={record['roe']:.1%}")
-    time.sleep(1.5)  # rate limit 保护
+    ticker_str = ",".join(t for t, _ in tickers)
+    print(f"  ✅ {len(results)}/{len(tickers)} tickers | 毛利率={avg_gm:.1%} ROE={avg_roe:.1%}")
 
 
 def main():
-    # 只处理申万代码（801xxx）
     metas = []
     for f in sorted(META_DIR.glob("801*.yaml")):
         m = yaml.safe_load(f.read_text())
         if m:
             metas.append(m)
 
-    print(f"共 {len(metas)} 个申万行业，开始抓取财务数据...\n")
-
+    print(f"共 {len(metas)} 个申万行业，开始抓取...\n")
     for i, meta in enumerate(metas, 1):
         print(f"[{i}/{len(metas)}]", end="")
         process_industry(meta)
-
     print("\n✅ 全部完成！")
 
 

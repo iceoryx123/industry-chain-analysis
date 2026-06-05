@@ -110,6 +110,12 @@ tags: ["社会服务", "Social Services & Platform", "申万一级", "双模分�
 
 ---
 
+
+---
+
+
+---
+
 ### 🔍 自动洞见（基于规则引擎）
 
 **行业**：社会服务 | **类别**：02-Platform | **细分**：Social Services & Platform | **版本**：双模(v10.x)
