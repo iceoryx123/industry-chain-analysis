@@ -98,6 +98,12 @@ tags: ["轻工制造", "Light Manufacturing", "申万一级"]
 
 ---
 
+
+---
+
+
+---
+
 ### 🔍 自动洞见（基于规则引擎）
 
 **行业**：轻工制造 | **类别**：01-Traditional | **细分**：Light Manufacturing | **版本**：传统(v9.2)

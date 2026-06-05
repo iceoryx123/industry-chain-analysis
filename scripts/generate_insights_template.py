@@ -26,6 +26,8 @@ def generate_insights(code: str, row: dict, meta: dict) -> str:
     cr4 = float(row.get("cr4", 0) or 0)
     hhi = float(row.get("hhi", 0) or 0)
     mkt = float(row.get("market_size_cny_bn", 0) or 0)
+    gm_trend = float(row.get("gross_margin_trend", 0) or 0)
+    roe_trend = float(row.get("roe_trend", 0) or 0)
 
     # ── 1. 价值枢纽 ──
     if has_net:
@@ -62,6 +64,27 @@ def generate_insights(code: str, row: dict, meta: dict) -> str:
     elif hhi < 1000:
         moat = max(1, moat - 1)
 
+    # ── 趋势加成（毛利率/ROE趋势方向） ──
+    gm_trend_flag = ""
+    roe_trend_flag = ""
+    if gm_trend > 0.02:
+        moat = min(10, moat + 1)
+        gm_trend_flag = "↑"
+    elif gm_trend < -0.02:
+        moat = max(1, moat - 1)
+        gm_trend_flag = "↓"
+    else:
+        gm_trend_flag = "→"
+
+    if roe_trend > 0.02:
+        pricing = min(10, pricing + 1)
+        roe_trend_flag = "↑"
+    elif roe_trend < -0.02:
+        pricing = max(1, pricing - 1)
+        roe_trend_flag = "↓"
+    else:
+        roe_trend_flag = "→"
+
     composite = round(moat * 0.30 + pricing * 0.25 + subst * 0.25 + eco * 0.20, 1)
 
     # ── 3. 拐点信号 ──
@@ -85,6 +108,15 @@ def generate_insights(code: str, row: dict, meta: dict) -> str:
         signals.append("🏢 集中度高，关注龙头定价权变化")
     if hhi > 2500:
         signals.append("🔒 市场高度集中，反垄断风险")
+    # ── 趋势信号 ──
+    if gm_trend > 0.03:
+        signals.append(f"📈 毛利率趋势向好（↑{gm_trend:.1%}/年），定价环境改善")
+    elif gm_trend < -0.03:
+        signals.append(f"📉 毛利率持续下滑（↓{abs(gm_trend):.1%}/年），关注成本/竞争压力")
+    if roe_trend > 0.03:
+        signals.append(f"📊 ROE 趋势上行（↑{roe_trend:.1%}/年），运营效率改善")
+    elif roe_trend < -0.03:
+        signals.append(f"⚠️ ROE 趋势下行（↓{abs(roe_trend):.1%}/年），盈利能力恶化")
     if mkt > 500:
         signals.append("📦 市场规模巨大，关注增量 / 存量切换")
     if not signals:

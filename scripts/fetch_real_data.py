@@ -60,28 +60,60 @@ def parse_num(val):
 
 
 def fetch_ticker_financial(ticker: str) -> dict:
-    """获取个股最新财务指标"""
-    result = {"gross_margin": None, "roe": None, "profit": None, "revenue": None}
+    """获取个股最新财务指标+历史趋势"""
+    result = {"gross_margin": None, "roe": None, "profit": None, "revenue": None,
+              "gm_trend": None, "roe_trend": None}
     symbol = ticker.replace(".SH", "").replace(".SZ", "").replace(".BJ", "")
     try:
         df = ak.stock_financial_abstract_ths(symbol=symbol)
         if df.empty:
             return result
         df = df.sort_values("报告期", ascending=False)
+        # 收集最多4期数据用于趋势计算
+        gm_vals = []
+        roe_vals = []
+        latest = result
         for _, row in df.iterrows():
             gm = parse_pct(row.get("销售毛利率", False))
             roe = parse_pct(row.get("净资产收益率", False))
             profit = parse_num(row.get("净利润", False))
             revenue = parse_num(row.get("营业总收入", False))
-            if gm is not None or roe is not None:
-                result = {
+            if gm is not None:
+                gm_vals.append(gm)
+            if roe is not None:
+                roe_vals.append(roe)
+            # 最新一期数据作为当前值（即使毛利率为None，也要记录ROE等）
+            if latest["gross_margin"] is None and (gm is not None or roe is not None):
+                latest = {
                     "gross_margin": gm if gm is not None else 0.0,
                     "roe": roe if roe is not None else 0.0,
-                    "profit": profit,
-                    "revenue": revenue,
+                    "profit": profit, "revenue": revenue,
+                    "gm_trend": 0.0, "roe_trend": 0.0,
                 }
-                return result
-        return result
+            if len(gm_vals) >= 4 and len(roe_vals) >= 4:
+                break
+
+        # 计算趋势（最新 vs 最旧，年化变化）
+        if len(gm_vals) >= 2:
+            # gm_vals[0]是最新, gm_vals[-1]是最旧
+            gm_start = gm_vals[-1]
+            gm_end = gm_vals[0]
+            n_years = max(len(gm_vals) - 1, 1)
+            if gm_start > 0:
+                latest["gm_trend"] = (gm_end - gm_start) / n_years
+            else:
+                latest["gm_trend"] = 0.0
+
+        if len(roe_vals) >= 2:
+            roe_start = roe_vals[-1]
+            roe_end = roe_vals[0]
+            n_years = max(len(roe_vals) - 1, 1)
+            if roe_start != 0:
+                latest["roe_trend"] = (roe_end - roe_start) / n_years
+            else:
+                latest["roe_trend"] = 0.0
+
+        return latest
     except Exception as e:
         print(f"    ⚠️ {ticker}: {e}")
         return result
@@ -125,6 +157,8 @@ def process_industry(meta: dict):
     avg_gm = sum(w * r["gross_margin"] for w, r in results if r["gross_margin"] is not None) / total_w
     avg_roe = sum(w * r["roe"] for w, r in results if r["roe"] is not None) / total_w
     avg_rev = sum(w * r["revenue"] for w, r in results) / total_w
+    avg_gm_trend = sum(w * r.get("gm_trend", 0.0) for w, r in results if r.get("gm_trend") is not None) / total_w
+    avg_roe_trend = sum(w * r.get("roe_trend", 0.0) for w, r in results if r.get("roe_trend") is not None) / total_w
 
     # ── 特殊规则覆盖 ──
     if special and "gross_margin_proxy" in special:
@@ -146,6 +180,8 @@ def process_industry(meta: dict):
         "network_intensity": 0.5 if has_net else 0.1,
         "platform_users_million": 0.0,
         "average_transaction_value_cny": 0.0,
+        "gross_margin_trend": round(avg_gm_trend, 4),
+        "roe_trend": round(avg_roe_trend, 4),
     }
 
     df = pd.DataFrame([record])

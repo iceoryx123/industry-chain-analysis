@@ -98,6 +98,12 @@ tags: ["石油石化", "Petroleum & Petrochemical", "申万一级"]
 
 ---
 
+
+---
+
+
+---
+
 ### 🔍 自动洞见（基于规则引擎）
 
 **行业**：石油石化 | **类别**：01-Traditional | **细分**：Petroleum & Petrochemical | **版本**：传统(v9.2)
