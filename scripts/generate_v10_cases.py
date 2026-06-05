@@ -4,12 +4,17 @@
 使用 Jinja2 完整渲染模板（支持条件语句、变量插值），保留 {{ indicator.xxx }} 供后续处理。
 """
 
-import os, shutil, datetime
+import os, sys, shutil, datetime
 from pathlib import Path
 import yaml
+
+# 确保 scripts/ 在 Python 路径中
+_SCRIPT_DIR = Path(__file__).parent.resolve()
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
 from template_utils import render_template, get_meta_by_code
 
-ROOT = Path(os.getenv("WORKSPACE", "/tmp/industry-chain-analysis-push"))
+ROOT = Path(os.getenv("WORKSPACE", str(_SCRIPT_DIR.parent)))
 META_DIR = ROOT / "data" / "meta"
 CASE_ROOT = ROOT / "cases" / "by-industry" / "02-Platform"
 TEMPLATE_CASE = ROOT / "templates" / "case_template_v10.md"

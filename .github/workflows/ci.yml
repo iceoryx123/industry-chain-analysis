@@ -29,9 +29,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install akshare yfinance pytrends 2>/dev/null || true
+        run: pip install -r requirements.txt
 
       # ========== 1️⃣ 数据抓取 ==========
       - name: Fetch real financial data (akshare)
@@ -42,12 +40,7 @@ jobs:
         run: python scripts/fetch_public_network.py || true
         continue-on-error: true
 
-      # ========== 2️⃣ 渲染 & 洞见 ==========
-      - name: Re-generate template cases (ensure {{ indicator.xxx }} exist)
-        run: |
-          python scripts/generate_v9_cases.py
-          python scripts/generate_v10_cases.py
-
+      # ========== 2️⃣ 洞见 & 仪表盘 ==========
       - name: Render cases with latest indicators
         run: python scripts/render_cases.py
 
@@ -66,21 +59,23 @@ jobs:
                     requirements.txt; do
             [[ -f "$f" ]] && echo "✅ $f" || { echo "❌ Missing: $f"; exit 1; }
           done
-          # 验证所有行业都有 case.md
           echo "=== 行业覆盖 ==="
           find cases/by-industry -name "case.md" | wc -l
+          echo "个案例"
 
       - name: Lint Markdown (non-blocking)
         run: |
           pip install markdownlint-cli2 2>/dev/null || true
-          find . -name "*.md" -not -path "./.git/*" | xargs -r markdownlint-cli2 --config .markdownlint.json 2>/dev/null || true
+          find . -name "*.md" -not -path "./.git/*" \
+            | xargs -r markdownlint-cli2 --config .markdownlint.json 2>/dev/null || true
 
       # ========== 4️⃣ 自动提交 ==========
       - name: Auto-commit generated files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
+          # 只提交数据文件和仪表盘
+          git add data/indicators/ cases/comparison/
           git diff --cached --quiet && echo "No changes to commit" && exit 0
-          git commit -m "ci: auto-update indicators, rendered cases & dashboard [skip ci]"
+          git commit -m "ci: auto-update indicators & dashboard [skip ci]"
           git push
