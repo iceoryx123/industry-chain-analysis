@@ -1,0 +1,15 @@
+code: 330000-23
+name: 金融数据与交易所
+shenwan_code: '330000'
+shenwan_industry: 非银金融
+subsector: 金融信息服务
+category: 申万一级行业
+has_network_effect: true
+update_cycle: monthly
+data_source:
+- Wind
+- 公司年报
+- 公开数据
+representative_ticker: ''
+official_website: ''
+description: 金融数据与交易所 — 申万非银金融行业下的金融信息服务子行业

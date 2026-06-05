@@ -1,0 +1,15 @@
+code: 380000-26
+name: 化工新材料
+shenwan_code: '380000'
+shenwan_industry: 基础化工
+subsector: 化工新材料
+category: 申万一级行业
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 公司年报
+- 公开数据
+representative_ticker: ''
+official_website: ''
+description: 化工新材料 — 申万基础化工行业下的化工新材料子行业

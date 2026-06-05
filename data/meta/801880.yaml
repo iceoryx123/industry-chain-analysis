@@ -1,0 +1,13 @@
+code: '801880'
+name: 机器人
+category: 04-Emerging
+subsector: Robotics & AI Hardware
+has_network_effect: true
+update_cycle: monthly
+data_source:
+- Wind
+- IFR
+- 中国电子学会
+representative_ticker: 000333.SZ
+official_website: ''
+description: 机器人（申万一级行业），隶属于 04-Emerging / Robotics & AI Hardware 类别。

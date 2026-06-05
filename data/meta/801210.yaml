@@ -1,0 +1,12 @@
+code: '801210'
+name: 轻工制造
+category: 01-Traditional
+subsector: Light Manufacturing
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 中国轻工联合会
+representative_ticker: 002572.SZ
+official_website: ''
+description: 轻工制造（申万一级行业），隶属于 01-Traditional / Light Manufacturing 类别。

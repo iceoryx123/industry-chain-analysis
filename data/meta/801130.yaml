@@ -1,0 +1,12 @@
+code: '801130'
+name: 社会服务
+category: 02-Platform
+subsector: Social Services & Platform
+has_network_effect: true
+update_cycle: monthly
+data_source:
+- Wind
+- 国家统计局
+representative_ticker: 600138.SH
+official_website: ''
+description: 社会服务（申万一级行业），隶属于 02-Platform / Social Services & Platform 类别。

@@ -1,0 +1,12 @@
+code: '801760'
+name: 农林牧渔
+category: 04-Emerging
+subsector: Agriculture Advanced
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 农业农村部
+representative_ticker: 000998.SZ
+official_website: ''
+description: 农林牧渔（申万一级行业），隶属于 04-Emerging / Agriculture Advanced 类别。

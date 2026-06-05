@@ -1,0 +1,12 @@
+code: '801790'
+name: 煤炭
+category: 04-Emerging
+subsector: Coal & Energy Mining
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 中国煤炭工业协会
+representative_ticker: 601898.SH
+official_website: ''
+description: 煤炭（申万一级行业），隶属于 04-Emerging / Coal & Energy Mining 类别。

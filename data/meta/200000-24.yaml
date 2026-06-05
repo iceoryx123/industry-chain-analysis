@@ -1,0 +1,15 @@
+code: 200000-24
+name: 检验检测与认证(TIC)
+shenwan_code: '200000'
+shenwan_industry: 社会服务
+subsector: 专业服务
+category: 申万一级行业
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 公司年报
+- 公开数据
+representative_ticker: ''
+official_website: ''
+description: 检验检测与认证(TIC) — 申万社会服务行业下的专业服务子行业

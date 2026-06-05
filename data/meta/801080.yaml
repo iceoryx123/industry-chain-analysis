@@ -1,0 +1,12 @@
+code: '801080'
+name: 建筑装饰
+category: 01-Traditional
+subsector: Construction & Decoration
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 住建部
+representative_ticker: 601668.SH
+official_website: ''
+description: 建筑装饰（申万一级行业），隶属于 01-Traditional / Construction & Decoration 类别。

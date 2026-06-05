@@ -1,0 +1,12 @@
+code: '801120'
+name: 电力设备
+category: 01-Traditional
+subsector: Electrical Equipment
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 中电联
+representative_ticker: 002531.SZ
+official_website: ''
+description: 电力设备（申万一级行业），隶属于 01-Traditional / Electrical Equipment 类别。

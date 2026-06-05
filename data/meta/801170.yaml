@@ -1,0 +1,13 @@
+code: '801170'
+name: 通信
+category: 02-Platform
+subsector: Telecom & Network
+has_network_effect: true
+update_cycle: monthly
+data_source:
+- Wind
+- 工信部
+- 三大运营商
+representative_ticker: 600050.SH
+official_website: ''
+description: 通信（申万一级行业），隶属于 02-Platform / Telecom & Network 类别。

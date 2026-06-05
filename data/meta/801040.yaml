@@ -1,0 +1,12 @@
+code: '801040'
+name: 有色金属
+category: 01-Traditional
+subsector: Non-ferrous Metals
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 安泰科
+representative_ticker: 000831.SZ
+official_website: ''
+description: 有色金属（申万一级行业），隶属于 01-Traditional / Non-ferrous Metals 类别。

@@ -1,0 +1,11 @@
+code: '801890'
+name: 综合
+category: 01-Traditional
+subsector: Conglomerate
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+representative_ticker: 600153.SH
+official_website: ''
+description: 综合（申万一级行业），隶属于 01-Traditional / Conglomerate 类别。

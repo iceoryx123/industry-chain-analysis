@@ -1,0 +1,12 @@
+code: '801070'
+name: 汽车
+category: 01-Traditional
+subsector: Automotive
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 中汽协
+representative_ticker: 600104.SH
+official_website: ''
+description: 汽车（申万一级行业），隶属于 01-Traditional / Automotive 类别。

@@ -1,0 +1,15 @@
+code: 120000-09
+name: 消费
+shenwan_code: '120000'
+shenwan_industry: 食品饮料
+subsector: 消费综合
+category: 申万一级行业
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 公司年报
+- 公开数据
+representative_ticker: ''
+official_website: ''
+description: 消费 — 申万食品饮料行业下的消费综合子行业

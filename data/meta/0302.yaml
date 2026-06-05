@@ -1,9 +1,0 @@
-code: "0302"
-name: "AI行业"
-category: "02‑Platform"
-subsector: "AI & Big‑Data"
-has_network_effect: true
-update_cycle: "monthly"
-data_source: ["IDC", "Gartner", "公司年报"]
-representative_ticker: "BIDU"
-official_website: "baidu.com"

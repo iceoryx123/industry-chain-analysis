@@ -1,0 +1,12 @@
+code: '801780'
+name: 石油石化
+category: 01-Traditional
+subsector: Petroleum & Petrochemical
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 中国石油和化学工业联合会
+representative_ticker: 600028.SH
+official_website: ''
+description: 石油石化（申万一级行业），隶属于 01-Traditional / Petroleum & Petrochemical 类别。

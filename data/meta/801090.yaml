@@ -1,0 +1,13 @@
+code: '801090'
+name: 传媒
+category: 02-Platform
+subsector: Media & Internet
+has_network_effect: true
+update_cycle: monthly
+data_source:
+- Wind
+- 艾瑞
+- QuestMobile
+representative_ticker: 300058.SZ
+official_website: ''
+description: 传媒（申万一级行业），隶属于 02-Platform / Media & Internet 类别。

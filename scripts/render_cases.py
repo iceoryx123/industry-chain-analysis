@@ -15,14 +15,18 @@ FIELDS = [
 def render_file(case_md: Path):
     txt = case_md.read_text(encoding="utf-8")
     # 从 case.md 头部提取 industry_code
-    m = re.search(r'industry_code:\s*["\']?(\w+)', txt)
+    m = re.search(r'industry_code:\s*["\']?([\w-]+)', txt)
     if not m:
         print(f"  ⚠️ 未找到 industry_code: {case_md}")
         return
     code = m.group(1)
     csv_path = IND_DIR / f"{code}.csv"
     if not csv_path.exists():
-        print(f"  ⚠️ 无 CSV: {csv_path}")
+        # 尝试只取申万代码
+        sw_code = code.split("-")[0]
+        csv_path = IND_DIR / f"{sw_code}.csv"
+    if not csv_path.exists():
+        print(f"  ⚠️ 无 CSV: {code}")
         return
     df = pd.read_csv(csv_path)
     latest = df.iloc[-1]
@@ -48,7 +52,7 @@ def render_file(case_md: Path):
         print(f"  🔎 无需渲染: {case_md}")
 
 def main():
-    for f in sorted(ROOT.glob("cases/**/case.md")):
+    for f in sorted(ROOT.glob("cases/**/*/case.md")):
         render_file(f)
 
 if __name__ == "__main__":

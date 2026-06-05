@@ -1,0 +1,13 @@
+code: '801160'
+name: 非银金融
+category: 03-Regulated
+subsector: Non-bank Finance
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 证监会
+- 银保监会
+representative_ticker: 601318.SH
+official_website: ''
+description: 非银金融（申万一级行业），隶属于 03-Regulated / Non-bank Finance 类别。

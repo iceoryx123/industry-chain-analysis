@@ -1,0 +1,13 @@
+code: '801060'
+name: 计算机
+category: 02-Platform
+subsector: Computing & Software
+has_network_effect: true
+update_cycle: monthly
+data_source:
+- Wind
+- IDC
+- 信通院
+representative_ticker: 000977.SZ
+official_website: ''
+description: 计算机（申万一级行业），隶属于 02-Platform / Computing & Software 类别。

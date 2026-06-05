@@ -1,0 +1,13 @@
+code: '801180'
+name: 房地产
+category: 03-Regulated
+subsector: Real Estate
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 国家统计局
+- 住建部
+representative_ticker: 000002.SZ
+official_website: ''
+description: 房地产（申万一级行业），隶属于 03-Regulated / Real Estate 类别。

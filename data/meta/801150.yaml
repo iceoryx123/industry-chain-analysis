@@ -1,0 +1,13 @@
+code: '801150'
+name: 医药生物
+category: 01-Traditional
+subsector: Healthcare
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 国家药监局
+- 卫健委
+representative_ticker: 300015.SZ
+official_website: ''
+description: 医药生物（申万一级行业），隶属于 01-Traditional / Healthcare 类别。

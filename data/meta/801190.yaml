@@ -1,0 +1,12 @@
+code: '801190'
+name: 公用事业
+category: 03-Regulated
+subsector: Utilities
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 国家能源局
+representative_ticker: 600900.SH
+official_website: ''
+description: 公用事业（申万一级行业），隶属于 03-Regulated / Utilities 类别。

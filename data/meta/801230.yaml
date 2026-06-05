@@ -1,0 +1,12 @@
+code: '801230'
+name: 交通运输
+category: 01-Traditional
+subsector: Transportation
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 交通运输部
+representative_ticker: 600026.SH
+official_website: ''
+description: 交通运输（申万一级行业），隶属于 01-Traditional / Transportation 类别。

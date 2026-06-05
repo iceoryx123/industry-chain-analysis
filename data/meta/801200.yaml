@@ -1,0 +1,12 @@
+code: '801200'
+name: 纺织服饰
+category: 01-Traditional
+subsector: Textile & Apparel
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 中国纺织工业协会
+representative_ticker: 002563.SZ
+official_website: ''
+description: 纺织服饰（申万一级行业），隶属于 01-Traditional / Textile & Apparel 类别。

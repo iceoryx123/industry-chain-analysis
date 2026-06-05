@@ -1,0 +1,12 @@
+code: '801720'
+name: 美容护理
+category: 04-Emerging
+subsector: Beauty & Personal Care
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 中国香料香精化妆品工业协会
+representative_ticker: 603160.SH
+official_website: ''
+description: 美容护理（申万一级行业），隶属于 04-Emerging / Beauty & Personal Care 类别。

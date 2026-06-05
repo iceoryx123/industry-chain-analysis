@@ -1,0 +1,15 @@
+code: 110000-15
+name: 农业与食品饮料
+shenwan_code: '110000'
+shenwan_industry: 农林牧渔
+subsector: 农业综合
+category: 申万一级行业
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 公司年报
+- 公开数据
+representative_ticker: ''
+official_website: ''
+description: 农业与食品饮料 — 申万农林牧渔行业下的农业综合子行业

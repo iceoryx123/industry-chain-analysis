@@ -1,9 +1,0 @@
-code: "0102"
-name: "口腔医院"
-category: "01‑Traditional"
-subsector: "Healthcare"
-has_network_effect: false
-update_cycle: "quarterly"
-data_source: ["Wind", "公司年报"]
-representative_ticker: "600763.SH"
-official_website: ""

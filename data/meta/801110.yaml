@@ -1,0 +1,12 @@
+code: '801110'
+name: 机械设备
+category: 01-Traditional
+subsector: Machinery & Equipment
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 中国机械工业联合会
+representative_ticker: 601369.SH
+official_website: ''
+description: 机械设备（申万一级行业），隶属于 01-Traditional / Machinery & Equipment 类别。

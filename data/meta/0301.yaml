@@ -1,9 +1,0 @@
-code: "0301"
-name: "互联网"
-category: "02‑Platform"
-subsector: "Internet & Media"
-has_network_effect: true
-update_cycle: "monthly"
-data_source: ["QuestMobile", "AppAnnie", "公司年报"]
-representative_ticker: "BABA"
-official_website: "alibaba.com"

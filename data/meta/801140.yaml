@@ -1,0 +1,13 @@
+code: '801140'
+name: 银行
+category: 03-Regulated
+subsector: Banking
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 央行
+- 银保监会
+representative_ticker: 601398.SH
+official_website: ''
+description: 银行（申万一级行业），隶属于 03-Regulated / Banking 类别。

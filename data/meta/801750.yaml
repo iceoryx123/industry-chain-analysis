@@ -1,0 +1,12 @@
+code: '801750'
+name: 食品饮料
+category: 04-Emerging
+subsector: Food & Beverage
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 中国食品工业协会
+representative_ticker: 000895.SZ
+official_website: ''
+description: 食品饮料（申万一级行业），隶属于 04-Emerging / Food & Beverage 类别。

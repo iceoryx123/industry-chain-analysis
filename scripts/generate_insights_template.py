@@ -75,29 +75,41 @@ def generate_insights(code: str, row: dict) -> str:
 - {suggestion}
 """
 
+def process_case(case_md: Path, code: str, insight: str):
+    """将洞见写入案例"""
+    txt = case_md.read_text(encoding="utf-8")
+    if "### 🔍 自动洞见（基于规则）" in txt:
+        before = txt.split("### 🔍 自动洞见（基于规则）")[0]
+        after = txt.split("### 🔍 自动洞见（基于规则）")[1]
+        if "---" in after:
+            parts = after.split("---", 1)
+            after = parts[1] if len(parts) > 1 else parts[0]
+        txt = before + insight + "\n---\n" + after.strip()
+    else:
+        txt += "\n\n---\n" + insight
+    case_md.write_text(txt, encoding="utf-8")
+    print(f"  ✅ 洞见已写入: {case_md}")
+
 def main():
     for csv_path in sorted(IND_DIR.glob("*.csv")):
         code = csv_path.stem
         df = pd.read_csv(csv_path)
+        if df.empty:
+            continue
         latest = df.iloc[-1].to_dict()
         insight = generate_insights(code, latest)
 
-        # 查找对应案例
-        for case_md in sorted(ROOT.glob(f"cases/**/{code}*/case.md")):
-            txt = case_md.read_text(encoding="utf-8")
-            # 检查是否已有自动洞见
-            if "### 🔍 自动洞见（基于规则）" in txt:
-                # 替换
-                before = txt.split("### 🔍 自动洞见（基于规则）")[0]
-                after = txt.split("### 🔍 自动洞见（基于规则）")[1]
-                if "---" in after:
-                    after = after.split("---", 1)[1] if "---" in after.split("---", 1)[1] else after
-                txt = before + insight + "\n---\n" + after.strip()
-            else:
-                # 追加到文件末尾
-                txt += "\n\n---\n" + insight
-            case_md.write_text(txt, encoding="utf-8")
-            print(f"  ✅ 洞见已写入: {case_md}")
+        # 查找对应案例：目录命名格式为 {code}-{name}
+        cases_found = list(ROOT.glob(f"cases/**/{code}-*/case.md"))
+        # 如果没找到，尝试仅用申万代码匹配
+        if not cases_found:
+            sw_code = code.split("-")[0]
+            cases_found = list(ROOT.glob(f"cases/**/{sw_code}-*/case.md"))
+            if len(cases_found) > 1:
+                print(f"  ⚠️ {code} 匹配到多个案例，跳过泛化写入")
+                continue
+        for case_md in sorted(cases_found):
+            process_case(case_md, code, insight)
 
 if __name__ == "__main__":
     main()

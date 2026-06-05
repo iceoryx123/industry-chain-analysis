@@ -1,0 +1,15 @@
+code: 200000-18
+name: 教育
+shenwan_code: '200000'
+shenwan_industry: 社会服务
+subsector: 教育
+category: 申万一级行业
+has_network_effect: true
+update_cycle: monthly
+data_source:
+- Wind
+- 公司年报
+- 公开数据
+representative_ticker: ''
+official_website: ''
+description: 教育 — 申万社会服务行业下的教育子行业

@@ -1,0 +1,12 @@
+code: '801710'
+name: 国防军工
+category: 04-Emerging
+subsector: Defense & Aerospace
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 国防科工局
+representative_ticker: 600893.SH
+official_website: ''
+description: 国防军工（申万一级行业），隶属于 04-Emerging / Defense & Aerospace 类别。

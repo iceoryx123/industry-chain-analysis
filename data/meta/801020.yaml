@@ -1,0 +1,12 @@
+code: '801020'
+name: 基础化工
+category: 01-Traditional
+subsector: Chemicals & New Materials
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 中国石油和化学工业联合会
+representative_ticker: 600309.SH
+official_website: ''
+description: 基础化工（申万一级行业），隶属于 01-Traditional / Chemicals & New Materials 类别。

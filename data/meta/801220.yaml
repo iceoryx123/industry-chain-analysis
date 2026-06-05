@@ -1,0 +1,12 @@
+code: '801220'
+name: 环保
+category: 03-Regulated
+subsector: Environmental Protection
+has_network_effect: false
+update_cycle: quarterly
+data_source:
+- Wind
+- 生态环境部
+representative_ticker: 002573.SZ
+official_website: ''
+description: 环保（申万一级行业），隶属于 03-Regulated / Environmental Protection 类别。
